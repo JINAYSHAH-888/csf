@@ -102,3 +102,6 @@ tr.sel td { background: var(--accent-soft) !important; }
 .bell i { position: absolute; top: -6px; right: -6px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--bad); color: #fff; font-style: normal; font-size: 10.5px; font-weight: 600; display: grid; place-items: center; }
 .pnode-count.tls { color: var(--good); }
 a.btn { text-decoration: none; color: inherit; }
+
+.muted { color: var(--muted); font-size: 12.5px; margin-top: 2px; font-weight: 400; }
+.table td .muted { display: block; line-height: 1.45; }

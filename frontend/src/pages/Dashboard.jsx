@@ -69,7 +69,6 @@ export default function Dashboard({ status, events, series, go, alerts = [], ack
         <Card><Kpi label="Mean inspection latency" value={<AnimatedNumber value={lat} decimals={1} />} unit="ms" /></Card>
       </div>
 
-      <div className="grid g3-2">
         <Card title="Inspection pipeline" hint="Cost-ordered: cheap checks first, costlier stages only when needed"
           right={<Badge tone="good" dot>Live</Badge>}>
           <div className="pipe">
@@ -97,6 +96,7 @@ export default function Dashboard({ status, events, series, go, alerts = [], ack
           </div>
         </Card>
 
+      <div className="grid g3">
         <Card title="Outcomes">
           <div className="donut-wrap">
             <Donut size={150} center={total ? Math.round((allowed / total) * 100) + '%' : '—'} centerSub="allowed"
@@ -107,9 +107,7 @@ export default function Dashboard({ status, events, series, go, alerts = [], ack
             </ul>
           </div>
         </Card>
-      </div>
 
-      <div className="grid g3">
         <Card title="Threat categories" hint="Recent audit window">
           {catRows.length ? (
             <div className="cats">
@@ -123,6 +121,17 @@ export default function Dashboard({ status, events, series, go, alerts = [], ack
             </div>
           ) : <div className="empty-inline">No threats recorded</div>}
         </Card>
+
+        <Card title="Gateway health">
+          <ul className="kv">
+            <li><span>Block-rate budget</span><b>{status?.decision ? Number(status.decision.block_rate_pct).toFixed(1) + '%' : '—'}</b></li>
+            <li><span>Circuit breaker</span><Badge tone={status?.circuit_breaker.tripped ? 'bad' : 'good'} dot>{status?.circuit_breaker.tripped ? 'Tripped' : 'Healthy'}</Badge></li>
+            <li><span>Rate limiter</span><b>{status?.rate_limit.limited ?? 0} limited</b></li>
+            <li><span>Malformed HTTP</span><b>{s?.framing_rejected ?? 0} rejected</b></li>
+            <li><span>Enforcement blockers</span><b>{status?.enforcement_blockers.length || 'None'}</b></li>
+          </ul>
+        </Card>
+      </div>
 
         <Card title="Latest detections" right={<button className="link-btn" onClick={() => go('traffic')}>View all <Icon name="arrow" size={14} /></button>}>
           {threats.length ? (
@@ -143,17 +152,6 @@ export default function Dashboard({ status, events, series, go, alerts = [], ack
             </ul>
           ) : <div className="empty-inline">No detections yet</div>}
         </Card>
-
-        <Card title="Gateway health">
-          <ul className="kv">
-            <li><span>Block-rate budget</span><b>{status?.decision ? status.decision.block_rate_pct + '%' : '—'}</b></li>
-            <li><span>Circuit breaker</span><Badge tone={status?.circuit_breaker.tripped ? 'bad' : 'good'} dot>{status?.circuit_breaker.tripped ? 'Tripped' : 'Healthy'}</Badge></li>
-            <li><span>Rate limiter</span><b>{status?.rate_limit.limited ?? 0} limited</b></li>
-            <li><span>Malformed HTTP</span><b>{s?.framing_rejected ?? 0} rejected</b></li>
-            <li><span>Enforcement blockers</span><b>{status?.enforcement_blockers.length || 'None'}</b></li>
-          </ul>
-        </Card>
-      </div>
     </div>
   )
 }

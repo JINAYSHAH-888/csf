@@ -81,9 +81,13 @@ export default function App() {
   useEffect(() => {
     if (!status) return
     const now = Date.now()
-    const dt = (now - last.current.t) / 1000
-    const rps = dt > 0 ? (status.stats.total - last.current.total) / dt : 0
-    last.current = { t: now, total: status.stats.total }
+    const prev = last.current
+    last.current = { t: now, total: status.stats.total, primed: true }
+    // The first sample has no baseline; counting it would show lifetime
+    // requests as one second of throughput.
+    if (!prev.primed) return
+    const dt = (now - prev.t) / 1000
+    const rps = dt > 0 ? (status.stats.total - prev.total) / dt : 0
     setSeries((s) => [...s, Math.max(0, rps)].slice(-40))
   }, [status])
 

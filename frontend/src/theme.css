@@ -16,7 +16,7 @@
   --warn: #a35f00; --warn-bg: #a35f0018;
   --deep: #f1f4f9; --card-end: #fbfcfe; --side-a: #ffffff; --side-b: #f6f8fc; --pop: #ffffff;
   --hero-ok: #eaf7f2; --hero-obs: #fdf5e4; --hero-end: #f1f5fb; --hover: #e8edf6; --scrim: #1a243a66;
-  --text-2: #3d4a63; --faint: #8795ae; --ov: #0f172a0d; --ov-soft: #0f172a08;
+  --text-2: #3d4a63; --faint: #6c7b96; --ov: #0f172a0d; --ov-soft: #0f172a08;
   --shadow-c: #1c2c52; --on-solid: #ffffff; --bar-bg: #f3f5f9e6;
 }
 :root[data-theme='light'] .content {
@@ -60,3 +60,8 @@
 .brand-sub { font-size: 10.5px; letter-spacing: .04em; }
 html { transition: background-color .25s; }
 body, .card, .sidebar, .topbar, .btn, .segmented, .badge { transition: background-color .25s, border-color .25s, color .25s; }
+
+:root[data-theme='light'] .seg2 button { color: var(--text-2); }
+:root[data-theme='light'] .seg2 button.on { color: var(--accent); background: var(--accent-soft); }
+:root[data-theme='light'] .seg2 button span { background: #0f172a12; }
+:root[data-theme='light'] .search { background: #fff; }

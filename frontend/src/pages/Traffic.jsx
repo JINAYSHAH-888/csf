@@ -61,7 +61,7 @@ export default function Traffic({ status, events, series, reset }) {
                   <td className="mono wrap">{e.method} {e.path}{e.payload?.query ? '?' + e.payload.query.slice(0, 48) : ''}</td>
                   <td><Badge tone={decisionTone(e.decision, e.enforced)} dot>{decisionLabel(e.decision, e.enforced)}</Badge></td>
                   <td>{category(e) || <span className="muted-c">—</span>}</td>
-                  <td className="muted-c">{e.decision === 'allow' ? '—' : e.stage.replaceAll('_', ' ')}</td>
+                  <td className="muted-c nowrap">{e.decision === 'allow' ? '—' : e.stage.replaceAll('_', ' ')}</td>
                   <td className="r nowrap">{(e.latency_us / 1000).toFixed(1)} ms</td>
                 </tr>
               ))}

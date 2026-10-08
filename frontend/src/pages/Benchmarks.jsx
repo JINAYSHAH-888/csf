@@ -53,8 +53,8 @@ export default function Benchmarks() {
             value: hold.per_class[k].rate_pct, tone: 'good' }))} />
           <p className="note">{hold.per_class.sqli.blocked}/{hold.per_class.sqli.n} SQL injection, {hold.per_class.xss.blocked}/{hold.per_class.xss.n} XSS and {hold.per_class.cmdi.blocked}/{hold.per_class.cmdi.n} command injection requests blocked.</p>
         </Card>
-        <Card title="On an unseen application" hint="Tuned on one dataset, tested on another">
-          <Bars rows={cross.variants.map((v) => ({ label: (NAMES[v.variant] || v.variant) + ' · false positives', value: v.ecml_fpr, tone: 'bad' }))} />
+        <Card title="False positives on an unseen application" hint="Tuned on one dataset, tested on another; lower is better">
+          <Bars rows={cross.variants.map((v) => ({ label: NAMES[v.variant] || v.variant, value: v.ecml_fpr, tone: 'bad' }))} />
           <p className="note">Scoring the rules on attack signatures only cut false positives from 67% to 4.7% while keeping 80% recall.</p>
         </Card>
       </div>
