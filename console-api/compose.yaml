@@ -43,6 +43,7 @@ services:
       - "127.0.0.1:8000:8000"
     volumes:
       - s1-socket:/run/csf
+      - ../docs/benchmarks:/app/docs/benchmarks:ro
 
 volumes:
   s1-socket:

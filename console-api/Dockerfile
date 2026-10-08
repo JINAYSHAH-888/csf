@@ -15,7 +15,6 @@ COPY --from=build --chown=csf:csf /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
 WORKDIR /app
 COPY --chown=csf:csf console-api/server.py ./console-api/server.py
-COPY --chown=csf:csf docs/benchmarks ./docs/benchmarks
 RUN mkdir -p /app/console-api/.runtime && chown 65532:65532 /app/console-api/.runtime
 USER 65532:65532
 EXPOSE 8000

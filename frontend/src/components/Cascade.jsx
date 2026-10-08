@@ -3,12 +3,12 @@ import { Icon } from './ui'
 // The inspection stages, in the order a request meets them, with a plain-English
 // description of what each one does.
 export const STAGES = [
-  { id: 's0_framing', code: 'S0', name: 'Protocol check', what: 'Rejects malformed or ambiguous HTTP (request smuggling).' },
-  { id: 's0_auth', code: 'S0', name: 'Token verification', what: 'Verifies the JWT signature, issuer, audience and expiry on protected routes.' },
-  { id: 's1_rules', code: 'S1', name: 'Signature rules', what: 'OWASP Core Rule Set via Coraza: known attack patterns.' },
-  { id: 's2_semantic', code: 'S2', name: 'Semantic analysis', what: 'Parses the input as SQL / HTML / shell and checks its structure, so disguised attacks still show their shape.' },
-  { id: 's3_model', code: 'S3', name: 'Learned model', what: 'Statistical classifier. Advisory only; documented as unreliable across applications.' },
-  { id: 's4_decision', code: 'S4', name: 'Final decision', what: 'Combines every stage that ran and applies the mode (enforce / shadow).' },
+  { id: 's0_framing', code: 'S0', name: 'Protocol check', what: 'Strict HTTP framing; rejects request-smuggling primitives.' },
+  { id: 's0_auth', code: 'S0', name: 'Token verification', what: 'JWT signature, issuer, audience and expiry on protected routes.' },
+  { id: 's1_rules', code: 'S1', name: 'Signature rules', what: 'OWASP Core Rule Set evaluated by Coraza.' },
+  { id: 's2_semantic', code: 'S2', name: 'Semantic analysis', what: 'Parses input as SQL, HTML and shell; attack shape survives obfuscation.' },
+  { id: 's3_model', code: 'S3', name: 'Learned model', what: 'Statistical classifier. Advisory only (ADR-0017).' },
+  { id: 's4_decision', code: 'S4', name: 'Final decision', what: 'Fuses stage evidence and applies the gateway mode.' },
 ]
 
 // Turn an /api/analyze + /api/send result into one row per stage.

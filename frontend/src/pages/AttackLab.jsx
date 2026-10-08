@@ -34,13 +34,12 @@ export default function AttackLab({ status, refreshStatus }) {
 
   return (
     <div className="page">
-      <PageHeader title="Attack lab">
-        Choose a request on the left. It is sent through the real gateway, and the right side shows
-        which stage inspected it, what it found, and whether the application ever received it.
+      <PageHeader title="Threat simulator">
+        Send a payload through the gateway and inspect the verdict of every stage.
       </PageHeader>
 
       <div className="lab">
-        <Card title="1. Choose a request" className="lab-pick">
+        <Card title="Payload library" className="lab-pick">
           <div className="tabs">
             {groups.map((g) => (
               <button key={g} className={'tab' + (g === group ? ' on' : '')} onClick={() => setGroup(g)}>{g}</button>
@@ -55,7 +54,7 @@ export default function AttackLab({ status, refreshStatus }) {
             ))}
           </div>
           <button className="link" onClick={() => { setCustom(!custom); if (!req) setReq({ method: 'GET', path: '/search', query: '', body: '' }) }}>
-            {custom ? 'Hide' : 'Write your own request'}
+            {custom ? 'Hide custom request' : 'Custom request'}
           </button>
           {custom && req && (
             <div className="custom">
@@ -76,8 +75,8 @@ export default function AttackLab({ status, refreshStatus }) {
           {!res && !busy && (
             <Card className="empty-state">
               <Icon name="target" size={28} />
-              <b>No request sent yet</b>
-              <p>Pick one from the list to begin.</p>
+              <b>No request sent</b>
+              <p>Select a payload to inspect the gateway verdict.</p>
             </Card>
           )}
           {err && <div className="alert bad">{err}</div>}
@@ -92,30 +91,30 @@ export default function AttackLab({ status, refreshStatus }) {
                   <div className="verdict-sub">
                     {label}{ev && <> · decided in {(ev.latency_us / 1000).toFixed(1)} ms · HTTP {res.sent.status}</>}
                   </div>
-                  {shadow && <div className="verdict-sub">In Enforce mode this request would have been blocked. Switch modes at the top right.</div>}
+                  {shadow && <div className="verdict-sub">Enforce mode would have blocked this request.</div>}
                 </div>
               </div>
 
-              <Card title="2. What each stage did">
+              <Card title="Inspection trace">
                 <Cascade rows={rows} />
               </Card>
 
               <div className="grid g2">
-                <Card title="3. What the application received">
+                <Card title="Application response">
                   {res.sent.reached_app ? (
                     <>
                       <div className={'alert ' + (shadow ? 'warn' : 'good')}>
-                        {shadow ? 'The request reached the application.' : 'Normal request delivered to the application.'}
+                        {shadow ? 'Request reached the application.' : 'Request delivered to the application.'}
                       </div>
                       <pre>{pretty(res.sent.response_body)}</pre>
                     </>
                   ) : (
                     <div className="alert good">
-                      Nothing. The application never saw this request; the gateway answered it directly.
+                      No response from the application. The gateway answered directly.
                     </div>
                   )}
                 </Card>
-                <Card title="Values the gateway examined" hint="after decoding">
+                <Card title="Inspected values" hint="decoded">
                   <table className="table">
                     <thead><tr><th>Where</th><th>Name</th><th>Decoded value</th></tr></thead>
                     <tbody>

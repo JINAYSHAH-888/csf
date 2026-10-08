@@ -26,7 +26,7 @@ const NAMES = {
 export default function Benchmarks() {
   const [b, setB] = useState(null)
   useEffect(() => { api.benchmarks().then(setB).catch(() => {}) }, [])
-  if (!b) return <div className="page"><PageHeader title="Benchmarks">Loading measured results…</PageHeader></div>
+  if (!b) return <div className="page"><PageHeader title="Detection performance">Loading</PageHeader></div>
 
   const hold = b['frozen-holdout']
   const cross = b['cross-corpus-attack-score']
@@ -35,10 +35,8 @@ export default function Benchmarks() {
 
   return (
     <div className="page">
-      <PageHeader title="Benchmarks">
-        Measured results from the project repository (<code>docs/benchmarks</code>). These are real
-        experiment outputs, not simulated. Recall means attacks caught; false-positive rate means
-        normal users wrongly blocked.
+      <PageHeader title="Detection performance">
+        Measured results from <code>docs/benchmarks</code>.
       </PageHeader>
 
       <div className="grid g4">

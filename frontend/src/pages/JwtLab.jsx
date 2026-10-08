@@ -33,11 +33,10 @@ export default function JwtLab({ refreshStatus }) {
 
   return (
     <div className="page">
-      <PageHeader title="Token lab"
+      <PageHeader title="Token verification"
         actions={<button className="btn primary" disabled={!info || busy} onClick={all}>
-          <Icon name="play" size={15} /> {busy ? 'Running…' : 'Test all tokens'}</button>}>
-        The admin page requires a signed login token (JWT). Each row below is a different token sent to
-        <code>/admin</code>. Only the genuine one should get in.
+          <Icon name="play" size={15} /> {busy ? 'Running' : 'Test all tokens'}</button>}>
+        RFC 8725 JWT verification on <code>/admin</code>: issuer, audience, expiry and RS256 signature.
       </PageHeader>
 
       {done.length > 0 && (

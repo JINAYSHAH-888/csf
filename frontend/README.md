@@ -1,12 +1,12 @@
-# CSF Security Console (frontend)
+# CSF Security Console
 
-React + Vite UI for the CSF gateway. Talks to `console-api/` (port 8000).
+React + Vite console for the CSF gateway. Talks to `console-api/` on port 8000.
 
-Quick start from the repo root: run `run-demo.bat` (starts the gateway + demo shop + console API, then this UI at http://localhost:5173).
+Run everything (Docker Desktop required for the S1 rules stage): `run-demo.bat` from the repo root.
+It needs `vendor/crs` (OWASP CRS v4.21.0, gitignored): `git clone --depth 1 --branch v4.21.0 https://github.com/coreruleset/coreruleset vendor/crs`.
 
-Manual:
+Manual, without S1:
 - `cd backend && uv sync --extra dev && uv run python ../console-api/server.py`
 - `cd frontend && npm install && npm run dev`
 
-Pages: Attack Lab, JWT Lab, Live Dashboard, Evidence.
-S1 (Coraza/CRS) needs the Go sidecar via Docker and is shown as disabled in this local demo.
+Pages: Dashboard, Live traffic, Scenario suite, Threat simulator, Token verification, Detection performance.
