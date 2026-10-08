@@ -7,6 +7,7 @@ import AttackLab from './pages/AttackLab'
 import JwtLab from './pages/JwtLab'
 import Traffic from './pages/Traffic'
 import Benchmarks from './pages/Benchmarks'
+import Palette from './components/Palette'
 
 const NAV = [
   { group: 'Monitor', items: [
@@ -49,6 +50,7 @@ export default function App() {
   const [events, setEvents] = useState([])
   const [series, setSeries] = useState([])
   const [gen, setGen] = useState(false)
+  const [pal, setPal] = useState(false)
   const seq = useRef(0)
   const last = useRef({ t: Date.now(), total: 0 })
 
@@ -92,7 +94,20 @@ export default function App() {
     return () => clearInterval(t)
   }, [gen])
 
+  useEffect(() => {
+    const h = (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setPal((v) => !v) } }
+    window.addEventListener('keydown', h)
+    return () => window.removeEventListener('keydown', h)
+  }, [])
+
   const reset = () => api.reset().then(() => { setEvents([]); setSeries([]); seq.current = 0; refresh() })
+
+  const commands = [
+    ...ALL.map(([id, label, icon]) => ({ group: 'Go to', label, icon, run: () => go(id) })),
+    ...MODES.map(([id, label]) => ({ group: 'Gateway mode', label: `Set mode: ${label}`, icon: 'shield', run: () => api.setMode(id).then(refresh) })),
+    { group: 'Action', label: gen ? 'Stop traffic generator' : 'Start traffic generator', icon: 'zap', run: () => setGen((v) => !v) },
+    { group: 'Action', label: 'Clear counters and log', icon: 'reset', run: reset },
+  ]
 
   const current = ALL.find((p) => p[0] === page) || ALL[0]
   const Page = current[3]
@@ -130,6 +145,7 @@ export default function App() {
         <div className="topbar">
           <div className="crumb"><span>CSF</span><Icon name="chevron" size={14} /><b>{current[1]}</b></div>
           <div className="top-right">
+            <button className="kbd-hint" onClick={() => setPal(true)}><Icon name="search" size={14} /> Search <kbd>Ctrl K</kbd></button>
             <button className={'gen' + (gen ? ' on' : '')} onClick={() => setGen(!gen)}>
               <span className="gen-dot" /> {gen ? 'Traffic generator on' : 'Traffic generator off'}
             </button>
@@ -151,6 +167,7 @@ export default function App() {
           <Page {...live} />
         </main>
       </div>
+      <Palette open={pal} onClose={() => setPal(false)} commands={commands} />
     </div>
   )
 }

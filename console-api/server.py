@@ -383,6 +383,8 @@ async def api_send(request: Request) -> JSONResponse:
                  "has_token": bool(token)}
     await asyncio.sleep(0.02)
     ev = next((e for e in reversed(EVENTS) if e.get("request_id") == rid), None)
+    if ev is not None:
+        ev["payload"] = SENT[rid]
     return JSONResponse({
         "status": r.status_code, "request_id": rid, "latency_ms": round(ms, 2),
         "response_body": r.text[:1500], "event": ev,

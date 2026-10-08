@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from 'react'
+
 // Shared building blocks: icons, headers, cards, badges, charts.
 
 const PATHS = {
@@ -20,6 +22,7 @@ const PATHS = {
   zap: 'M13 2L4 14h7l-1 8 9-12h-7z',
   server: 'M4 5h16v6H4zM4 13h16v6H4zM8 8h.01M8 16h.01',
   layers: 'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5M3 17l9 5 9-5',
+  search: 'M11 18a7 7 0 100-14 7 7 0 000 14zM21 21l-5-5',
 }
 
 export function Icon({ name, size = 18 }) {
@@ -71,6 +74,42 @@ export function Sparkline({ data, tone = 'accent', height = 36 }) {
       {pts.length > 1 && <polygon points={`0,${height} ${line} ${w},${height}`} className="spark-area" />}
       {pts.length > 1 && <polyline points={line} className="spark-line" />}
     </svg>
+  )
+}
+
+export function AnimatedNumber({ value, decimals = 0 }) {
+  const [shown, setShown] = useState(value)
+  const from = useRef(value)
+  useEffect(() => {
+    const start = performance.now(), a = from.current, b = Number(value) || 0
+    let raf
+    const tick = (t) => {
+      const p = Math.min(1, (t - start) / 600)
+      const v = a + (b - a) * (1 - Math.pow(1 - p, 3))
+      setShown(v)
+      if (p < 1) raf = requestAnimationFrame(tick); else from.current = b
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [value])
+  return <>{Number(shown).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}</>
+}
+
+export function Drawer({ open, onClose, title, children }) {
+  useEffect(() => {
+    if (!open) return
+    const h = (e) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', h)
+    return () => window.removeEventListener('keydown', h)
+  }, [open, onClose])
+  return (
+    <>
+      <div className={'drawer-bg' + (open ? ' open' : '')} onClick={onClose} />
+      <aside className={'drawer' + (open ? ' open' : '')} aria-hidden={!open}>
+        <div className="drawer-head"><h2>{title}</h2><button className="icon-btn" onClick={onClose} aria-label="Close"><Icon name="x" size={16} /></button></div>
+        <div className="drawer-body">{children}</div>
+      </aside>
+    </>
   )
 }
 

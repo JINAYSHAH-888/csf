@@ -1,77 +1,101 @@
 import { useState } from 'react'
-import { PageHeader, Card, Kpi, Badge, Icon, category, decisionTone, decisionLabel } from '../components/ui'
+import { PageHeader, Card, Badge, Icon, Drawer, category, decisionTone, decisionLabel } from '../components/ui'
 
 export default function Traffic({ status, events, series, reset }) {
   const [filter, setFilter] = useState('all')
-  const [open, setOpen] = useState(null)
-  const s = status?.stats
-  const d = status?.decision
-  const total = s?.total || 0
-  const blocked = (s?.blocked ?? 0) + (s?.shadow_would_block ?? 0)
-  const shown = events.filter((e) => filter === 'all' || (filter === 'blocked' ? e.decision === 'block' : e.decision !== 'block'))
+  const [q, setQ] = useState('')
+  const [sel, setSel] = useState(null)
+
+  const text = (e) => `${e.method} ${e.path}${e.payload?.query ? '?' + e.payload.query : ''} ${category(e) || ''} ${e.stage}`.toLowerCase()
+  const shown = events.filter((e) =>
+    (filter === 'all' || (filter === 'blocked' ? e.decision === 'block' : e.decision !== 'block')) &&
+    (!q || text(e).includes(q.toLowerCase())))
+  const selected = events.find((e) => e.seq === sel)
+  const counts = {
+    all: events.length,
+    blocked: events.filter((e) => e.decision === 'block').length,
+    allowed: events.filter((e) => e.decision !== 'block').length,
+  }
 
   return (
     <div className="page">
       <PageHeader title="Live traffic"
-        actions={<button className="btn" onClick={reset}><Icon name="reset" size={15} /> Reset counters</button>}>
-        Real-time audit stream from the gateway.
+        actions={<button className="btn" onClick={reset}><Icon name="reset" size={15} /> Clear log</button>}>
+        Request-level audit stream. Select a row to inspect the decision.
       </PageHeader>
 
-      <div className="grid g4">
-        <Card><Kpi label="Requests" value={total.toLocaleString()} series={series} /></Card>
-        <Card><Kpi label="Allowed" value={(s?.allowed ?? 0).toLocaleString()} tone="good" /></Card>
-        <Card><Kpi label="Blocked" value={blocked.toLocaleString()} tone="bad" sub={s?.auth_rejected ? `${s.auth_rejected} identity` : ''} /></Card>
-        <Card><Kpi label="Rate limited" value={status?.rate_limit.limited ?? 0} /></Card>
-      </div>
+      <Card title="Throughput" hint="requests per second, last 40 s"
+        right={<span className="live-tag"><i /> Live</span>}>
+        <Chart data={series} />
+      </Card>
 
-      <div className="grid g3-2">
-        <Card title="Throughput" hint="requests / second, last 40 s"><Chart data={series} /></Card>
-        <Card title="Gateway health">
-          <ul className="kv">
-            <li><span>Block-rate budget</span><b>{d ? d.block_rate_pct + '%' : '—'}</b></li>
-            <li><span>Circuit breaker</span><Badge tone={status?.circuit_breaker.tripped ? 'bad' : 'good'} dot>{status?.circuit_breaker.tripped ? 'Tripped' : 'Healthy'}</Badge></li>
-            <li><span>Malformed HTTP rejected</span><b>{s?.framing_rejected ?? 0}</b></li>
-            <li><span>Enforcement blockers</span><b>{status?.enforcement_blockers.length || 'None'}</b></li>
-          </ul>
-        </Card>
-      </div>
-
-      <Card title="Audit log"
-        right={<div className="tabs compact">
-          {[['all', 'All'], ['blocked', 'Blocked'], ['allowed', 'Allowed']].map(([id, l]) => (
-            <button key={id} className={'tab' + (filter === id ? ' on' : '')} onClick={() => setFilter(id)}>{l}</button>
-          ))}</div>}>
+      <Card className="log-card">
+        <div className="log-bar">
+          <div className="seg2">
+            {[['all', 'All'], ['blocked', 'Blocked'], ['allowed', 'Allowed']].map(([id, l]) => (
+              <button key={id} className={filter === id ? 'on' : ''} onClick={() => setFilter(id)}>
+                {l}<span>{counts[id]}</span>
+              </button>
+            ))}
+          </div>
+          <input className="search" placeholder="Filter by path, category or stage" value={q} onChange={(e) => setQ(e.target.value)} />
+        </div>
         <div className="scroll">
           <table className="table hover">
             <thead><tr><th>Time</th><th>Request</th><th>Outcome</th><th>Category</th><th>Stage</th><th className="r">Latency</th></tr></thead>
             <tbody>
-              {shown.map((e) => [
-                <tr key={e.seq} onClick={() => setOpen(open === e.seq ? null : e.seq)}>
+              {shown.map((e) => (
+                <tr key={e.seq} className={'row-in' + (sel === e.seq ? ' sel' : '')} onClick={() => setSel(e.seq)}>
                   <td className="nowrap muted-c">{new Date(e.ts * 1000).toLocaleTimeString()}</td>
                   <td className="mono wrap">{e.method} {e.path}{e.payload?.query ? '?' + e.payload.query.slice(0, 48) : ''}</td>
                   <td><Badge tone={decisionTone(e.decision, e.enforced)} dot>{decisionLabel(e.decision, e.enforced)}</Badge></td>
                   <td>{category(e) || <span className="muted-c">—</span>}</td>
-                  <td className="muted-c">{e.decision === 'allow' ? '—' : e.stage.replace('_', ' ')}</td>
+                  <td className="muted-c">{e.decision === 'allow' ? '—' : e.stage.replaceAll('_', ' ')}</td>
                   <td className="r nowrap">{(e.latency_us / 1000).toFixed(1)} ms</td>
-                </tr>,
-                open === e.seq && (
-                  <tr key={e.seq + 'x'} className="inspect"><td colSpan={6}>
-                    <div className="detail"><b>Finding</b> {e.reason || 'No stage objected.'}</div>
-                    <div className="detail"><b>Score</b> {e.score?.toFixed?.(1)} <b>Mode</b> {e.mode} <b>Request</b> {e.request_id}</div>
-                  </td></tr>
-                ),
-              ])}
-              {!shown.length && <tr><td colSpan={6} className="empty">No events</td></tr>}
+                </tr>
+              ))}
+              {!shown.length && <tr><td colSpan={6} className="empty">No matching events</td></tr>}
             </tbody>
           </table>
         </div>
       </Card>
+
+      <Drawer open={!!selected} onClose={() => setSel(null)} title="Request detail">
+        {selected && <Detail e={selected} />}
+      </Drawer>
+    </div>
+  )
+}
+
+function Detail({ e }) {
+  const cat = category(e)
+  const p = e.payload
+  return (
+    <div className="dt">
+      <div className={'dt-verdict ' + decisionTone(e.decision, e.enforced)}>
+        <Icon name={e.decision === 'block' ? 'x' : 'check'} size={18} />
+        <div>
+          <b>{decisionLabel(e.decision, e.enforced)}</b>
+          <span>{cat ? cat : 'No threat detected'}</span>
+        </div>
+      </div>
+      <dl className="dt-grid">
+        <div><dt>Request ID</dt><dd className="mono">{e.request_id}</dd></div>
+        <div><dt>Decided by</dt><dd>{e.decision === 'allow' ? 'No stage objected' : e.stage.replaceAll('_', ' ')}</dd></div>
+        <div><dt>Score</dt><dd>{e.score?.toFixed?.(1)}</dd></div>
+        <div><dt>Latency</dt><dd>{(e.latency_us / 1000).toFixed(2)} ms</dd></div>
+        <div><dt>Mode</dt><dd className="cap">{e.mode}</dd></div>
+        <div><dt>Time</dt><dd>{new Date(e.ts * 1000).toLocaleTimeString()}</dd></div>
+      </dl>
+      <div className="dt-k">Request</div>
+      <pre>{e.method} {e.path}{p?.query ? '?' + p.query : ''}{p?.body ? '\n\n' + p.body : ''}</pre>
+      {e.reason && <><div className="dt-k">Finding</div><pre>{e.reason}</pre></>}
     </div>
   )
 }
 
 function Chart({ data }) {
-  const w = 520, h = 150
+  const w = 720, h = 150
   const max = Math.max(2, ...data)
   const pts = data.map((v, i) => [(i / Math.max(1, data.length - 1)) * w, h - 16 - (v / max) * (h - 30)])
   const line = pts.map((p) => p.join(',')).join(' ')

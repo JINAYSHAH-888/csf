@@ -1,4 +1,4 @@
-import { Icon, Card, Kpi, Badge, Donut, category, decisionTone, decisionLabel } from '../components/ui'
+import { Icon, Card, Kpi, Badge, Donut, AnimatedNumber, category, decisionTone, decisionLabel } from '../components/ui'
 
 const PIPE = [
   { id: 's0_framing', code: 'S0', name: 'Protocol', sub: 'HTTP framing' },
@@ -37,7 +37,7 @@ export default function Dashboard({ status, events, series, go }) {
   events.forEach((e) => { const c = category(e); if (c) cats[c] = (cats[c] || 0) + 1 })
   const catRows = Object.entries(cats).sort((a, b) => b[1] - a[1])
   const catMax = Math.max(1, ...catRows.map((r) => r[1]))
-  const threats = events.filter((e) => e.decision !== 'allow').slice(0, 7)
+  const threats = events.filter((e) => e.decision !== 'allow').slice(0, 5)
 
   return (
     <div className="page">
@@ -58,10 +58,10 @@ export default function Dashboard({ status, events, series, go }) {
       </div>
 
       <div className="grid g4">
-        <Card><Kpi label="Requests inspected" value={total.toLocaleString()} series={series} /></Card>
-        <Card><Kpi label="Threats stopped" value={blocked.toLocaleString()} tone="bad" sub={enforce ? '' : 'would-block'} /></Card>
-        <Card><Kpi label="Attack share" value={rate} unit="%" tone={Number(rate) > 40 ? 'warn' : 'good'} /></Card>
-        <Card><Kpi label="Mean inspection latency" value={lat.toFixed(1)} unit="ms" /></Card>
+        <Card><Kpi label="Requests inspected" value={<AnimatedNumber value={total} />} series={series} /></Card>
+        <Card><Kpi label="Threats stopped" value={<AnimatedNumber value={blocked} />} tone="bad" sub={enforce ? '' : 'would-block'} /></Card>
+        <Card><Kpi label="Attack share" value={<AnimatedNumber value={Number(rate)} decimals={1} />} unit="%" tone={Number(rate) > 40 ? 'warn' : 'good'} /></Card>
+        <Card><Kpi label="Mean inspection latency" value={<AnimatedNumber value={lat} decimals={1} />} unit="ms" /></Card>
       </div>
 
       <div className="grid g3-2">
@@ -101,7 +101,7 @@ export default function Dashboard({ status, events, series, go }) {
         </Card>
       </div>
 
-      <div className="grid g2">
+      <div className="grid g3">
         <Card title="Threat categories" hint="Recent audit window">
           {catRows.length ? (
             <div className="cats">
@@ -134,6 +134,16 @@ export default function Dashboard({ status, events, series, go }) {
               ))}
             </ul>
           ) : <div className="empty-inline">No detections yet</div>}
+        </Card>
+
+        <Card title="Gateway health">
+          <ul className="kv">
+            <li><span>Block-rate budget</span><b>{status?.decision ? status.decision.block_rate_pct + '%' : '—'}</b></li>
+            <li><span>Circuit breaker</span><Badge tone={status?.circuit_breaker.tripped ? 'bad' : 'good'} dot>{status?.circuit_breaker.tripped ? 'Tripped' : 'Healthy'}</Badge></li>
+            <li><span>Rate limiter</span><b>{status?.rate_limit.limited ?? 0} limited</b></li>
+            <li><span>Malformed HTTP</span><b>{s?.framing_rejected ?? 0} rejected</b></li>
+            <li><span>Enforcement blockers</span><b>{status?.enforcement_blockers.length || 'None'}</b></li>
+          </ul>
         </Card>
       </div>
     </div>
