@@ -266,7 +266,12 @@ def _build_config() -> Config:
     # S1 (Coraza/CRS) is reachable only from the docker stack, over a unix
     # socket shared with the Go sidecar container.
     if os.environ.get("CSF_S1_SOCKET"):
-        cfg.s1 = S1Settings(enabled=True, socket_path=os.environ["CSF_S1_SOCKET"])
+        # The library default (50 ms) is tuned for a native Linux host. Under
+        # Docker Desktop on Windows, cold CRS evaluations exceed it and the
+        # request is reported "sidecar unavailable", which trips the circuit
+        # breaker. 500 ms keeps the stage honest on this platform.
+        cfg.s1 = S1Settings(enabled=True, socket_path=os.environ["CSF_S1_SOCKET"],
+                            timeout_seconds=float(os.environ.get("CSF_S1_TIMEOUT", "0.5")))
     cfg.auth = AuthConfig(
         enabled=True, protected_prefixes=("/admin", "/api/internal"),
         fail_closed=True,
