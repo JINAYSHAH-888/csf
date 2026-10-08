@@ -1,0 +1,87 @@
+[project]
+name = "csf-gateway"
+version = "0.1.0"
+description = "CSF — Cascaded Semantic Firewall: inline security gateway"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "starlette>=0.41",
+    "uvicorn[standard]>=0.32",
+    "httpx>=0.28",
+    "pyjwt[crypto]>=2.10",
+    "cryptography>=44",
+    "pydantic>=2.10",
+    # S2's parser. Was missing entirely: it had never been declared, and the
+    # module imports worked only because the development venv happened to
+    # have it. The container build is what surfaced that -- the whole semantic
+    # stage failed to import from a clean install of this manifest.
+    "sqlglot>=27",
+    # csf/framing.py imports this DIRECTLY. It also arrives transitively via
+    # uvicorn[standard], which is why nothing broke, but framing documents
+    # measured strictness differences between httptools and h11 and reports
+    # which parser is live. A module whose behaviour depends on a package must
+    # declare it rather than inherit it from a server extra that may drop it.
+    "httptools>=0.6",
+]
+
+[project.optional-dependencies]
+# S3 is optional at runtime. The learned stage loads a pickle containing
+# scikit-learn estimators, so sklearn is needed to DESERIALISE the artifact
+# even though no module imports it by name -- an AST scan of the source will
+# not find this dependency. Kept out of the default install because Phase 6
+# recorded S3 as a negative result and the gateway runs without it.
+s3 = [
+    "scikit-learn>=1.5",
+    "numpy>=2.0",
+]
+security = [
+    # Real supply-chain tooling (Phase 12). cyclonedx-bom generates the
+    # CycloneDX SBOM from the live environment; pip-audit scans it against the
+    # PyPI advisory DB. The Go equivalents (cyclonedx-gomod, govulncheck) are
+    # installed via `go install`, not pip.
+    "cyclonedx-bom>=7",
+    "pip-audit>=2.7",
+]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "pytest-cov>=6.0",
+    "hypothesis>=6.120",
+    "ruff>=0.8",
+    "mypy>=1.13",
+]
+
+[project.scripts]
+csf-gateway = "csf.main:main"
+
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["csf*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+filterwarnings = ["error"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "S", "A", "C4", "RET", "SIM", "ARG", "PTH"]
+# S101 (assert) is fine in tests; handled per-file below.
+ignore = ["S104"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "S105", "S106", "ARG001", "ARG002", "ARG005", "N802", "E501"]
+# Benchmark/measurement scripts: throwaway formatting is acceptable, and
+# they legitimately reference the operator-configured socket path.
+"scripts/*" = ["E501", "E702", "S108", "T201", "N803", "N806"]  # X/y is the sklearn convention
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true

@@ -1,0 +1,90 @@
+{
+  "split": "val",
+  "n": 1953,
+  "measured_at": "2026-10-01T23:11:44+0530",
+  "sweep": [
+    {
+      "threshold": 0,
+      "detection_pct": 100.0,
+      "fpr_pct": 100.0,
+      "false_positives": 560
+    },
+    {
+      "threshold": 1,
+      "detection_pct": 51.830581478822694,
+      "fpr_pct": 1.7857142857142856,
+      "false_positives": 10
+    },
+    {
+      "threshold": 2,
+      "detection_pct": 51.830581478822694,
+      "fpr_pct": 1.7857142857142856,
+      "false_positives": 10
+    },
+    {
+      "threshold": 3,
+      "detection_pct": 51.830581478822694,
+      "fpr_pct": 1.7857142857142856,
+      "false_positives": 10
+    },
+    {
+      "threshold": 5,
+      "detection_pct": 47.23618090452261,
+      "fpr_pct": 1.7857142857142856,
+      "false_positives": 10
+    },
+    {
+      "threshold": 8,
+      "detection_pct": 35.46302943287868,
+      "fpr_pct": 0.17857142857142858,
+      "false_positives": 1
+    },
+    {
+      "threshold": 10,
+      "detection_pct": 35.24766690595836,
+      "fpr_pct": 0.17857142857142858,
+      "false_positives": 1
+    },
+    {
+      "threshold": 15,
+      "detection_pct": 32.44795405599425,
+      "fpr_pct": 0.0,
+      "false_positives": 0
+    },
+    {
+      "threshold": 20,
+      "detection_pct": 30.725053840631727,
+      "fpr_pct": 0.0,
+      "false_positives": 0
+    },
+    {
+      "threshold": 25,
+      "detection_pct": 28.499641062455133,
+      "fpr_pct": 0.0,
+      "false_positives": 0
+    },
+    {
+      "threshold": 30,
+      "detection_pct": 25.269203158650395,
+      "fpr_pct": 0.0,
+      "false_positives": 0
+    },
+    {
+      "threshold": 40,
+      "detection_pct": 16.295764536970566,
+      "fpr_pct": 0.0,
+      "false_positives": 0
+    },
+    {
+      "threshold": 50,
+      "detection_pct": 7.537688442211055,
+      "fpr_pct": 0.0,
+      "false_positives": 0
+    }
+  ],
+  "benign_p99": 5,
+  "latency_us": {
+    "engine_p50": 2218,
+    "engine_p99": 5778
+  }
+}

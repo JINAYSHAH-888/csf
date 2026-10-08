@@ -1,0 +1,1066 @@
+{
+  "measured_at": "2026-10-01T22:42:26+0530",
+  "corpus": {
+    "benign": 40,
+    "attack": 48,
+    "note": "hand-built; provisional. Phase 4 replaces with CSIC 2010 / ECML-PKDD 2007 / captured traffic."
+  },
+  "sweep": [
+    {
+      "threshold": 0,
+      "detection_pct": 100.0,
+      "fpr_pct": 100.0,
+      "missed": 0,
+      "false_positives": 40
+    },
+    {
+      "threshold": 1,
+      "detection_pct": 100.0,
+      "fpr_pct": 12.5,
+      "missed": 0,
+      "false_positives": 5
+    },
+    {
+      "threshold": 2,
+      "detection_pct": 100.0,
+      "fpr_pct": 12.5,
+      "missed": 0,
+      "false_positives": 5
+    },
+    {
+      "threshold": 3,
+      "detection_pct": 100.0,
+      "fpr_pct": 12.5,
+      "missed": 0,
+      "false_positives": 5
+    },
+    {
+      "threshold": 5,
+      "detection_pct": 100.0,
+      "fpr_pct": 12.5,
+      "missed": 0,
+      "false_positives": 5
+    },
+    {
+      "threshold": 8,
+      "detection_pct": 97.91666666666666,
+      "fpr_pct": 0.0,
+      "missed": 1,
+      "false_positives": 0
+    },
+    {
+      "threshold": 10,
+      "detection_pct": 97.91666666666666,
+      "fpr_pct": 0.0,
+      "missed": 1,
+      "false_positives": 0
+    },
+    {
+      "threshold": 15,
+      "detection_pct": 93.75,
+      "fpr_pct": 0.0,
+      "missed": 3,
+      "false_positives": 0
+    },
+    {
+      "threshold": 20,
+      "detection_pct": 83.33333333333334,
+      "fpr_pct": 0.0,
+      "missed": 8,
+      "false_positives": 0
+    },
+    {
+      "threshold": 25,
+      "detection_pct": 66.66666666666666,
+      "fpr_pct": 0.0,
+      "missed": 16,
+      "false_positives": 0
+    },
+    {
+      "threshold": 30,
+      "detection_pct": 54.166666666666664,
+      "fpr_pct": 0.0,
+      "missed": 22,
+      "false_positives": 0
+    },
+    {
+      "threshold": 35,
+      "detection_pct": 33.33333333333333,
+      "fpr_pct": 0.0,
+      "missed": 32,
+      "false_positives": 0
+    },
+    {
+      "threshold": 40,
+      "detection_pct": 14.583333333333334,
+      "fpr_pct": 0.0,
+      "missed": 41,
+      "false_positives": 0
+    },
+    {
+      "threshold": 45,
+      "detection_pct": 6.25,
+      "fpr_pct": 0.0,
+      "missed": 45,
+      "false_positives": 0
+    },
+    {
+      "threshold": 50,
+      "detection_pct": 2.083333333333333,
+      "fpr_pct": 0.0,
+      "missed": 47,
+      "false_positives": 0
+    },
+    {
+      "threshold": 60,
+      "detection_pct": 2.083333333333333,
+      "fpr_pct": 0.0,
+      "missed": 47,
+      "false_positives": 0
+    },
+    {
+      "threshold": 80,
+      "detection_pct": 0.0,
+      "fpr_pct": 0.0,
+      "missed": 48,
+      "false_positives": 0
+    }
+  ],
+  "derived": {
+    "tau_low": 4,
+    "tau_high": 8,
+    "target_fpr": 0.0
+  },
+  "latency_us": {
+    "engine_p50": 1050,
+    "engine_p95": 1608,
+    "end_to_end_p50": 1451.499992981553,
+    "end_to_end_p95": 2050.166018307209,
+    "ipc_mean": 421.69463621668365
+  },
+  "results": [
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1446,
+      "client_us": 2097.6669911760837
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1322,
+      "client_us": 1840.0000117253512
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1178,
+      "client_us": 1634.166983421892
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 978,
+      "client_us": 1443.0830196943134
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1065,
+      "client_us": 1504.4160245452076
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1034,
+      "client_us": 1407.4579812586308
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1132,
+      "client_us": 1510.833011707291
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1003,
+      "client_us": 1420.6250198185444
+    },
+    {
+      "label": "benign",
+      "detection": 5,
+      "blocking": 0,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 1,
+      "engine_us": 969,
+      "client_us": 1421.2910027708858
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 879,
+      "client_us": 1333.2499947864562
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 854,
+      "client_us": 1202.9159988742322
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 949,
+      "client_us": 1281.5000081900507
+    },
+    {
+      "label": "benign",
+      "detection": 5,
+      "blocking": 0,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 1,
+      "engine_us": 1002,
+      "client_us": 1501.7910045571625
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 961,
+      "client_us": 1420.1670128386468
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1008,
+      "client_us": 1380.3750043734908
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 996,
+      "client_us": 1339.66701105237
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 870,
+      "client_us": 1209.0409873053432
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 960,
+      "client_us": 1292.9999793414026
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 968,
+      "client_us": 1305.0830166321248
+    },
+    {
+      "label": "benign",
+      "detection": 5,
+      "blocking": 0,
+      "categories": [
+        "rce"
+      ],
+      "actionable_rules": 1,
+      "engine_us": 948,
+      "client_us": 1309.7909977659583
+    },
+    {
+      "label": "benign",
+      "detection": 5,
+      "blocking": 0,
+      "categories": [
+        "rce"
+      ],
+      "actionable_rules": 1,
+      "engine_us": 1056,
+      "client_us": 1451.3329952023923
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1127,
+      "client_us": 1495.9159889258444
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1049,
+      "client_us": 1382.0419844705611
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 569,
+      "client_us": 905.0829976331443
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 553,
+      "client_us": 3245.917003368959
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 965,
+      "client_us": 1331.0840004123747
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 509,
+      "client_us": 833.9170017279685
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 825,
+      "client_us": 1141.7499918024987
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1091,
+      "client_us": 1409.6250233706087
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 908,
+      "client_us": 1248.084008693695
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 974,
+      "client_us": 1322.7089948486537
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1029,
+      "client_us": 1367.3329958692193
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1608,
+      "client_us": 1996.3329832535237
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1624,
+      "client_us": 1967.999996850267
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1313,
+      "client_us": 1646.3329957332462
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1706,
+      "client_us": 2050.166018307209
+    },
+    {
+      "label": "benign",
+      "detection": 5,
+      "blocking": 0,
+      "categories": [
+        "rce"
+      ],
+      "actionable_rules": 1,
+      "engine_us": 1270,
+      "client_us": 1624.2499987129122
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1736,
+      "client_us": 2197.291993070394
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1119,
+      "client_us": 1496.4579895604402
+    },
+    {
+      "label": "benign",
+      "detection": 0,
+      "blocking": 0,
+      "categories": [],
+      "actionable_rules": 0,
+      "engine_us": 1303,
+      "client_us": 1665.4999926686287
+    },
+    {
+      "label": "sqli",
+      "detection": 40,
+      "blocking": 5,
+      "categories": [
+        "rce",
+        "sqli"
+      ],
+      "actionable_rules": 8,
+      "engine_us": 992,
+      "client_us": 1508.7089850567281
+    },
+    {
+      "label": "sqli",
+      "detection": 30,
+      "blocking": 15,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 6,
+      "engine_us": 1099,
+      "client_us": 1630.2079893648624
+    },
+    {
+      "label": "sqli",
+      "detection": 25,
+      "blocking": 5,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 5,
+      "engine_us": 833,
+      "client_us": 1246.6670013964176
+    },
+    {
+      "label": "sqli",
+      "detection": 30,
+      "blocking": 15,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 6,
+      "engine_us": 1083,
+      "client_us": 1482.541993027553
+    },
+    {
+      "label": "sqli",
+      "detection": 35,
+      "blocking": 10,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 7,
+      "engine_us": 1012,
+      "client_us": 1405.6669897399843
+    },
+    {
+      "label": "sqli",
+      "detection": 25,
+      "blocking": 5,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 5,
+      "engine_us": 1118,
+      "client_us": 1496.0419794078916
+    },
+    {
+      "label": "sqli",
+      "detection": 35,
+      "blocking": 15,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 7,
+      "engine_us": 1127,
+      "client_us": 1549.4579856749624
+    },
+    {
+      "label": "sqli",
+      "detection": 40,
+      "blocking": 5,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 8,
+      "engine_us": 1210,
+      "client_us": 1654.124993365258
+    },
+    {
+      "label": "sqli",
+      "detection": 20,
+      "blocking": 5,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 4,
+      "engine_us": 949,
+      "client_us": 1323.4590005595237
+    },
+    {
+      "label": "sqli",
+      "detection": 35,
+      "blocking": 10,
+      "categories": [
+        "rce",
+        "sqli"
+      ],
+      "actionable_rules": 6,
+      "engine_us": 1050,
+      "client_us": 1431.9170149974525
+    },
+    {
+      "label": "sqli",
+      "detection": 40,
+      "blocking": 5,
+      "categories": [
+        "rce",
+        "sqli"
+      ],
+      "actionable_rules": 8,
+      "engine_us": 937,
+      "client_us": 1353.2919983845204
+    },
+    {
+      "label": "sqli",
+      "detection": 15,
+      "blocking": 5,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 3,
+      "engine_us": 877,
+      "client_us": 1228.5000120755285
+    },
+    {
+      "label": "sqli",
+      "detection": 30,
+      "blocking": 5,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 6,
+      "engine_us": 1304,
+      "client_us": 1702.5840061251074
+    },
+    {
+      "label": "sqli",
+      "detection": 25,
+      "blocking": 5,
+      "categories": [
+        "rce",
+        "sqli"
+      ],
+      "actionable_rules": 5,
+      "engine_us": 960,
+      "client_us": 1365.1670014951378
+    },
+    {
+      "label": "sqli",
+      "detection": 45,
+      "blocking": 20,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 9,
+      "engine_us": 1325,
+      "client_us": 1775.2089770510793
+    },
+    {
+      "label": "xss",
+      "detection": 30,
+      "blocking": 20,
+      "categories": [
+        "xss",
+        "sqli"
+      ],
+      "actionable_rules": 6,
+      "engine_us": 1087,
+      "client_us": 1482.1249933447689
+    },
+    {
+      "label": "xss",
+      "detection": 30,
+      "blocking": 15,
+      "categories": [
+        "xss"
+      ],
+      "actionable_rules": 6,
+      "engine_us": 1123,
+      "client_us": 1515.4170105233788
+    },
+    {
+      "label": "xss",
+      "detection": 20,
+      "blocking": 20,
+      "categories": [
+        "xss"
+      ],
+      "actionable_rules": 4,
+      "engine_us": 1132,
+      "client_us": 1525.0839933287352
+    },
+    {
+      "label": "xss",
+      "detection": 20,
+      "blocking": 15,
+      "categories": [
+        "xss"
+      ],
+      "actionable_rules": 4,
+      "engine_us": 958,
+      "client_us": 1308.5420068819076
+    },
+    {
+      "label": "xss",
+      "detection": 35,
+      "blocking": 20,
+      "categories": [
+        "xss",
+        "sqli"
+      ],
+      "actionable_rules": 7,
+      "engine_us": 1050,
+      "client_us": 1438.4590031113476
+    },
+    {
+      "label": "xss",
+      "detection": 25,
+      "blocking": 15,
+      "categories": [
+        "xss"
+      ],
+      "actionable_rules": 5,
+      "engine_us": 1017,
+      "client_us": 1402.4169940967113
+    },
+    {
+      "label": "xss",
+      "detection": 35,
+      "blocking": 25,
+      "categories": [
+        "xss"
+      ],
+      "actionable_rules": 7,
+      "engine_us": 1098,
+      "client_us": 1472.6669760420918
+    },
+    {
+      "label": "xss",
+      "detection": 45,
+      "blocking": 20,
+      "categories": [
+        "xss",
+        "sqli"
+      ],
+      "actionable_rules": 9,
+      "engine_us": 1169,
+      "client_us": 1593.332999618724
+    },
+    {
+      "label": "xss",
+      "detection": 30,
+      "blocking": 20,
+      "categories": [
+        "xss",
+        "sqli"
+      ],
+      "actionable_rules": 6,
+      "engine_us": 1035,
+      "client_us": 1451.499992981553
+    },
+    {
+      "label": "xss",
+      "detection": 63,
+      "blocking": 30,
+      "categories": [
+        "php",
+        "rce",
+        "injection",
+        "xss",
+        "sqli"
+      ],
+      "actionable_rules": 12,
+      "engine_us": 1383,
+      "client_us": 1841.625024098903
+    },
+    {
+      "label": "cmdi",
+      "detection": 15,
+      "blocking": 10,
+      "categories": [
+        "lfi",
+        "rce"
+      ],
+      "actionable_rules": 3,
+      "engine_us": 1021,
+      "client_us": 1399.0000006742775
+    },
+    {
+      "label": "cmdi",
+      "detection": 20,
+      "blocking": 15,
+      "categories": [
+        "rce"
+      ],
+      "actionable_rules": 4,
+      "engine_us": 882,
+      "client_us": 1257.6250010170043
+    },
+    {
+      "label": "cmdi",
+      "detection": 5,
+      "blocking": 0,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 1,
+      "engine_us": 810,
+      "client_us": 1172.040996607393
+    },
+    {
+      "label": "cmdi",
+      "detection": 10,
+      "blocking": 10,
+      "categories": [
+        "rce"
+      ],
+      "actionable_rules": 2,
+      "engine_us": 926,
+      "client_us": 1303.8339966442436
+    },
+    {
+      "label": "cmdi",
+      "detection": 10,
+      "blocking": 5,
+      "categories": [
+        "rce"
+      ],
+      "actionable_rules": 2,
+      "engine_us": 1216,
+      "client_us": 1566.916995216161
+    },
+    {
+      "label": "cmdi",
+      "detection": 20,
+      "blocking": 5,
+      "categories": [
+        "rfi",
+        "rce",
+        "sqli"
+      ],
+      "actionable_rules": 4,
+      "engine_us": 1065,
+      "client_us": 1419.874985003844
+    },
+    {
+      "label": "cmdi",
+      "detection": 15,
+      "blocking": 5,
+      "categories": [
+        "rce",
+        "sqli"
+      ],
+      "actionable_rules": 3,
+      "engine_us": 1131,
+      "client_us": 1491.8330125510693
+    },
+    {
+      "label": "cmdi",
+      "detection": 15,
+      "blocking": 10,
+      "categories": [
+        "lfi",
+        "rce"
+      ],
+      "actionable_rules": 3,
+      "engine_us": 1011,
+      "client_us": 1380.1669992972165
+    },
+    {
+      "label": "traversal",
+      "detection": 35,
+      "blocking": 30,
+      "categories": [
+        "lfi",
+        "rce"
+      ],
+      "actionable_rules": 5,
+      "engine_us": 984,
+      "client_us": 1645.0829862151295
+    },
+    {
+      "label": "traversal",
+      "detection": 15,
+      "blocking": 10,
+      "categories": [
+        "lfi",
+        "rce"
+      ],
+      "actionable_rules": 3,
+      "engine_us": 1016,
+      "client_us": 1404.9160236027092
+    },
+    {
+      "label": "traversal",
+      "detection": 23,
+      "blocking": 20,
+      "categories": [
+        "protocol",
+        "lfi"
+      ],
+      "actionable_rules": 4,
+      "engine_us": 1038,
+      "client_us": 1428.9169921539724
+    },
+    {
+      "label": "traversal",
+      "detection": 35,
+      "blocking": 30,
+      "categories": [
+        "lfi",
+        "rce"
+      ],
+      "actionable_rules": 5,
+      "engine_us": 1095,
+      "client_us": 1461.9160210713744
+    },
+    {
+      "label": "traversal",
+      "detection": 25,
+      "blocking": 20,
+      "categories": [
+        "lfi",
+        "rce"
+      ],
+      "actionable_rules": 3,
+      "engine_us": 1033,
+      "client_us": 1404.1250105947256
+    },
+    {
+      "label": "sqli",
+      "detection": 40,
+      "blocking": 5,
+      "categories": [
+        "rce",
+        "sqli"
+      ],
+      "actionable_rules": 8,
+      "engine_us": 1122,
+      "client_us": 1527.9169892892241
+    },
+    {
+      "label": "sqli",
+      "detection": 30,
+      "blocking": 15,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 6,
+      "engine_us": 1202,
+      "client_us": 1568.4160171076655
+    },
+    {
+      "label": "sqli",
+      "detection": 25,
+      "blocking": 5,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 5,
+      "engine_us": 966,
+      "client_us": 1315.5839988030493
+    },
+    {
+      "label": "sqli",
+      "detection": 30,
+      "blocking": 15,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 6,
+      "engine_us": 1160,
+      "client_us": 1529.1669988073409
+    },
+    {
+      "label": "sqli",
+      "detection": 35,
+      "blocking": 10,
+      "categories": [
+        "sqli"
+      ],
+      "actionable_rules": 7,
+      "engine_us": 1154,
+      "client_us": 1552.1250024903566
+    },
+    {
+      "label": "xss",
+      "detection": 30,
+      "blocking": 20,
+      "categories": [
+        "xss",
+        "sqli"
+      ],
+      "actionable_rules": 6,
+      "engine_us": 2242,
+      "client_us": 2717.7920273970813
+    },
+    {
+      "label": "xss",
+      "detection": 30,
+      "blocking": 15,
+      "categories": [
+        "xss"
+      ],
+      "actionable_rules": 6,
+      "engine_us": 1305,
+      "client_us": 1710.8339816331863
+    },
+    {
+      "label": "xss",
+      "detection": 20,
+      "blocking": 20,
+      "categories": [
+        "xss"
+      ],
+      "actionable_rules": 4,
+      "engine_us": 1271,
+      "client_us": 1697.2500015981495
+    },
+    {
+      "label": "xss",
+      "detection": 20,
+      "blocking": 15,
+      "categories": [
+        "xss"
+      ],
+      "actionable_rules": 4,
+      "engine_us": 1200,
+      "client_us": 1586.3750013522804
+    },
+    {
+      "label": "xss",
+      "detection": 35,
+      "blocking": 20,
+      "categories": [
+        "xss",
+        "sqli"
+      ],
+      "actionable_rules": 7,
+      "engine_us": 1175,
+      "client_us": 1556.4580098725855
+    }
+  ]
+}

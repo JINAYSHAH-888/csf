@@ -1,0 +1,50 @@
+{
+  "at_configured_tau_block": {
+    "CSIC": {
+      "fpr_pct": 0.0,
+      "recall_pct": 61.75771971496437,
+      "threshold": 4.0
+    },
+    "ECML": {
+      "fpr_pct": 3.428571428571429,
+      "recall_pct": 56.99999999999999,
+      "threshold": 4.0
+    }
+  },
+  "cross_corpus_drop_pp_at_fpr_0.1pct": 52.57745164574143,
+  "csic_n": 2006,
+  "ecml_n": 4200,
+  "latency_us": {
+    "max": 42859,
+    "p50": 2685,
+    "p95": 6210,
+    "p99": 7883
+  },
+  "measured_at": "2026-10-08T10:22:42+0530",
+  "per_class_recall_at_csic_0.1pct_fpr": {
+    "benign": {
+      "csic_pct": 0.0,
+      "ecml_pct": 3.428571428571429
+    },
+    "cmdi": {
+      "csic_pct": 85.29411764705883,
+      "ecml_pct": 54.0
+    },
+    "other": {
+      "csic_pct": 7.512195121951219,
+      "ecml_pct": 16.714285714285715
+    },
+    "sqli": {
+      "csic_pct": 22.93577981651376,
+      "ecml_pct": 46.85714285714286
+    },
+    "traversal": {
+      "csic_pct": null,
+      "ecml_pct": 57.85714285714286
+    },
+    "xss": {
+      "csic_pct": 73.77049180327869,
+      "ecml_pct": 77.42857142857143
+    }
+  }
+}

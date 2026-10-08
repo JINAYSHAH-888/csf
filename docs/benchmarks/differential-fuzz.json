@@ -1,0 +1,159 @@
+{
+  "cases": 24,
+  "findings": [],
+  "rows": [
+    {
+      "case": "cl+te",
+      "h11": "accept",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "dup_cl_conflict",
+      "h11": "reject",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "dup_cl_agree",
+      "h11": "accept",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "te_obfuscated",
+      "csf": "OK",
+      "h11": "accept(body=0)",
+      "httptools": "accept(body=0)",
+      "verdict": "parsers agree"
+    },
+    {
+      "case": "te_xchunked",
+      "h11": "reject",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "te_identity_chunked",
+      "csf": "unsupported_transfer_encoding",
+      "h11": "reject",
+      "httptools": "accept(body=0)",
+      "verdict": "DIFFERENTIAL -> CSF must reject"
+    },
+    {
+      "case": "space_before_colon",
+      "h11": "reject",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "tab_in_cl",
+      "csf": "OK",
+      "h11": "accept(body=5)",
+      "httptools": "accept(body=5)",
+      "verdict": "parsers agree"
+    },
+    {
+      "case": "cl_odd_+5",
+      "h11": "reject",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "cl_odd_-5",
+      "h11": "reject",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "cl_odd_0x5",
+      "h11": "reject",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "cl_odd_5",
+      "csf": "OK",
+      "h11": "accept(body=5)",
+      "httptools": "accept(body=5)",
+      "verdict": "parsers agree"
+    },
+    {
+      "case": "cl_odd_5",
+      "csf": "OK",
+      "h11": "accept(body=5)",
+      "httptools": "accept(body=5)",
+      "verdict": "parsers agree"
+    },
+    {
+      "case": "cl_odd_05",
+      "csf": "OK",
+      "h11": "accept(body=5)",
+      "httptools": "accept(body=5)",
+      "verdict": "parsers agree"
+    },
+    {
+      "case": "dup_host",
+      "csf": "duplicate_host",
+      "h11": "reject",
+      "httptools": "accept(body=0)",
+      "verdict": "DIFFERENTIAL -> CSF must reject"
+    },
+    {
+      "case": "chunk_ext",
+      "csf": "OK",
+      "h11": "accept(body=5)",
+      "httptools": "accept(body=5)",
+      "verdict": "parsers agree"
+    },
+    {
+      "case": "bare_lf",
+      "h11": "accept",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "double_te",
+      "h11": "reject",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "te_then_cl",
+      "h11": "accept",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "cl_vtab",
+      "h11": "reject",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "cl_formfeed",
+      "h11": "reject",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "cl_unicode_digit",
+      "h11": "reject",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "chunk_nonhex",
+      "h11": "reject",
+      "httptools": "reject",
+      "verdict": "httptools-rejected (never reaches CSF)"
+    },
+    {
+      "case": "clean",
+      "csf": "OK",
+      "h11": "accept(body=5)",
+      "httptools": "accept(body=5)",
+      "verdict": "parsers agree"
+    }
+  ]
+}
