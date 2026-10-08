@@ -1,5 +1,7 @@
 export const API = import.meta.env.VITE_API || 'http://127.0.0.1:8000'
 
+export const EXPORT_URL = (import.meta.env.VITE_API || 'http://127.0.0.1:8000') + '/api/export/feedback.jsonl'
+
 async function call(path, opts) {
   const r = await fetch(API + path, opts)
   if (!r.ok) throw new Error(`${path} -> ${r.status}`)
@@ -22,4 +24,7 @@ export const api = {
   send: (spec) => post('/api/send', spec),
   setMode: (mode) => post('/api/mode', { mode }),
   reset: () => post('/api/reset'),
+  alerts: () => call('/api/alerts'),
+  ackAlert: (id) => post(`/api/alerts/${id}/ack`),
+  exportSummary: () => call('/api/export/summary'),
 }

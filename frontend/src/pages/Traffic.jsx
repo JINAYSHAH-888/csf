@@ -1,10 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { api, EXPORT_URL } from '../api'
 import { PageHeader, Card, Badge, Icon, Drawer, category, decisionTone, decisionLabel } from '../components/ui'
 
 export default function Traffic({ status, events, series, reset }) {
   const [filter, setFilter] = useState('all')
   const [q, setQ] = useState('')
   const [sel, setSel] = useState(null)
+  const [fb, setFb] = useState(null)
+  useEffect(() => {
+    const load = () => api.exportSummary().then(setFb).catch(() => {})
+    load()
+    const t = setInterval(load, 4000)
+    return () => clearInterval(t)
+  }, [])
 
   const text = (e) => `${e.method} ${e.path}${e.payload?.query ? '?' + e.payload.query : ''} ${category(e) || ''} ${e.stage}`.toLowerCase()
   const shown = events.filter((e) =>
@@ -20,7 +28,10 @@ export default function Traffic({ status, events, series, reset }) {
   return (
     <div className="page">
       <PageHeader title="Live traffic"
-        actions={<button className="btn" onClick={reset}><Icon name="reset" size={15} /> Clear log</button>}>
+        actions={<>
+          <a className="btn" href={EXPORT_URL} download><Icon name="download" size={15} /> Export feedback dataset{fb ? ` (${fb.records})` : ''}</a>
+          <button className="btn" onClick={reset}><Icon name="reset" size={15} /> Clear log</button>
+        </>}>
         Request-level audit stream. Select a row to inspect the decision.
       </PageHeader>
 

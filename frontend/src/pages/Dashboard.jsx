@@ -1,6 +1,8 @@
+import Alerts from '../components/Alerts'
 import { Icon, Card, Kpi, Badge, Donut, AnimatedNumber, category, decisionTone, decisionLabel } from '../components/ui'
 
 const PIPE = [
+  { id: 'tls', code: 'TLS', name: 'Transport', sub: 'TLS termination' },
   { id: 's0_framing', code: 'S0', name: 'Protocol', sub: 'HTTP framing' },
   { id: 's0_auth', code: 'S0', name: 'Identity', sub: 'JWT verification' },
   { id: 's1_rules', code: 'S1', name: 'Signatures', sub: 'OWASP CRS' },
@@ -19,7 +21,7 @@ function ago(ts) {
   return s < 60 ? `${s}s ago` : `${Math.floor(s / 60)}m ago`
 }
 
-export default function Dashboard({ status, events, series, go }) {
+export default function Dashboard({ status, events, series, go, alerts = [], ackAlert }) {
   const s = status?.stats
   const total = s?.total ?? 0
   const blocked = (s?.blocked ?? 0) + (s?.shadow_would_block ?? 0)
@@ -52,10 +54,13 @@ export default function Dashboard({ status, events, series, go }) {
         </div>
         <div className="hero-meta">
           <div><span>Protected app</span><b>demo-shop</b></div>
+          <div><span>Transport</span><b>{status?.tls?.enabled ? status.tls.version.replace('TLSv', 'TLS ') : 'Plain HTTP'}</b></div>
           <div><span>Mode</span><b className="cap">{status?.mode || '—'}</b></div>
           <div><span>Uptime</span><b>{status ? Math.floor(status.uptime_s / 60) + 'm ' + (status.uptime_s % 60) + 's' : '—'}</b></div>
         </div>
       </div>
+
+      <Alerts alerts={alerts} onAck={ackAlert} />
 
       <div className="grid g4">
         <Card><Kpi label="Requests inspected" value={<AnimatedNumber value={total} />} series={series} /></Card>
@@ -69,14 +74,17 @@ export default function Dashboard({ status, events, series, go }) {
           right={<Badge tone="good" dot>Live</Badge>}>
           <div className="pipe">
             {PIPE.map((p, i) => {
-              const on = p.id === 's1_rules' ? enabled('s1_rules') : true
+              const tlsNode = p.id === 'tls'
+              const on = p.id === 's1_rules' ? enabled('s1_rules') : tlsNode ? !!status?.tls?.enabled : true
               return (
                 <div key={p.id} className="pipe-item">
                   <div className={'pnode' + (on ? '' : ' off')}>
                     <div className="pnode-code">{p.code}</div>
                     <div className="pnode-name">{p.name}</div>
                     <div className="pnode-sub">{p.sub}</div>
-                    <div className="pnode-count">{on ? (stopped[p.id] || 0) : '—'}<small>{on ? ' stopped' : ' offline'}</small></div>
+                    {tlsNode
+                      ? <div className="pnode-count tls">{on ? status.tls.version.replace('TLSv', 'v') : '—'}<small>{on ? ' ' + status.tls.bits + '-bit' : ' off'}</small></div>
+                      : <div className="pnode-count">{on ? (stopped[p.id] || 0) : '—'}<small>{on ? ' stopped' : ' offline'}</small></div>}
                   </div>
                   {i < PIPE.length - 1 && <div className="plink"><i /><i /><i /></div>}
                 </div>

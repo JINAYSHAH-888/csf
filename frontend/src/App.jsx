@@ -47,6 +47,7 @@ export default function App() {
   const [status, setStatus] = useState(null)
   const [down, setDown] = useState(false)
   const [events, setEvents] = useState([])
+  const [alerts, setAlerts] = useState([])
   const [series, setSeries] = useState([])
   const [gen, setGen] = useState(false)
   const [pal, setPal] = useState(false)
@@ -106,6 +107,12 @@ export default function App() {
   }, [theme])
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
 
+  useEffect(() => {
+    const t = setInterval(() => api.alerts().then((r) => setAlerts(r.alerts)).catch(() => {}), 2000)
+    return () => clearInterval(t)
+  }, [])
+  const ackAlert = (id) => api.ackAlert(id).then((a) => setAlerts((l) => l.map((x) => (x.id === a.id ? a : x))))
+
   const reset = () => api.reset().then(() => { setEvents([]); setSeries([]); seq.current = 0; refresh() })
 
   const commands = [
@@ -118,7 +125,8 @@ export default function App() {
 
   const current = ALL.find((p) => p[0] === page) || ALL[0]
   const Page = current[3]
-  const live = { status, events, series, reset, refreshStatus: refresh, go }
+  const live = { status, events, series, alerts, ackAlert, reset, refreshStatus: refresh, go }
+  const openAlerts = alerts.filter((a) => !a.acknowledged)
 
   return (
     <div className="shell">
@@ -152,6 +160,9 @@ export default function App() {
         <div className="topbar">
           <div className="crumb"><span>CSF</span><Icon name="chevron" size={14} /><b>{current[1]}</b></div>
           <div className="top-right">
+            <button className={'bell' + (openAlerts.length ? ' on' : '')} onClick={() => go('dashboard')} title="Open alerts" aria-label="Alerts">
+              <Icon name="bell" size={16} />{openAlerts.length > 0 && <i>{openAlerts.length}</i>}
+            </button>
             <button className="kbd-hint" onClick={() => setPal(true)}><Icon name="search" size={14} /> Search <kbd>Ctrl K</kbd></button>
             <button className={'gen' + (gen ? ' on' : '')} onClick={() => setGen(!gen)}>
               <span className="gen-dot" /> {gen ? 'Traffic generator on' : 'Traffic generator off'}

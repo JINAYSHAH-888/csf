@@ -15,12 +15,15 @@ from __future__ import annotations
 
 import asyncio
 import base64
-import os
 import collections
+import datetime
 import hashlib
 import hmac
+import ipaddress
 import json
 import logging
+import os
+import ssl
 import time
 from pathlib import Path
 from typing import Any
@@ -28,19 +31,22 @@ from typing import Any
 import httpx
 import jwt
 import uvicorn
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import ec, rsa
+from cryptography.x509.oid import NameOID
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from starlette.responses import JSONResponse, PlainTextResponse
+from starlette.responses import JSONResponse, PlainTextResponse, Response
 from starlette.routing import Route
 
 from csf.config import AuthConfig, Config, IssuerSettings, S1Settings, S2Settings
 from csf.decision import DecisionEngine, StageEvidence
 from csf.extraction import extract
 from csf.main import build_app
+from csf.model.features import request_document
 from csf.telemetry import Mode
 from csf.verdict import Decision
 
@@ -48,10 +54,11 @@ ROOT = Path(__file__).resolve().parent.parent
 RUNTIME = Path(__file__).resolve().parent / ".runtime"
 BENCH_DIR = ROOT / "docs" / "benchmarks"
 
-GATEWAY = "http://127.0.0.1:8080"
+GATEWAY = "https://127.0.0.1:8080"   # TLS is terminated by the gateway listener
 ISSUER = "https://csf.demo/"
 AUDIENCE = "csf-api"
 KID = "demo-1"
+EC_KID = "demo-ec"
 # 0.0.0.0 inside a container so the published port works; loopback otherwise.
 BIND = os.environ.get("CSF_CONSOLE_BIND", "127.0.0.1")
 
@@ -67,6 +74,18 @@ _PRIVATE_PEM = _PRIVATE.private_bytes(
     serialization.NoEncryption())
 _ATTACKER = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 _ATTACKER_PEM = _ATTACKER.private_bytes(
+    serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
+    serialization.NoEncryption())
+
+# ECDSA (P-256) issuer key and an attacker's EC key for ES256 scenarios.
+_EC = ec.generate_private_key(ec.SECP256R1())
+_EC_PUBLIC_PEM = _EC.public_key().public_bytes(
+    serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo)
+_EC_PRIVATE_PEM = _EC.private_bytes(
+    serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
+    serialization.NoEncryption())
+_EC_ATTACKER = ec.generate_private_key(ec.SECP256R1())
+_EC_ATTACKER_PEM = _EC_ATTACKER.private_bytes(
     serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
     serialization.NoEncryption())
 
@@ -87,7 +106,35 @@ def _rs256(claims: dict[str, Any], key: bytes = _PRIVATE_PEM, kid: str = KID) ->
     return jwt.encode(claims, key, algorithm="RS256", headers={"kid": kid})
 
 
+def _es256(claims: dict[str, Any], key: bytes = _EC_PRIVATE_PEM, kid: str = EC_KID) -> str:
+    return jwt.encode(claims, key, algorithm="ES256", headers={"kid": kid})
+
+
+def _ecdsa_tokens() -> list[dict[str, str]]:
+    ok = _es256(_claims())
+    h, _p, s = ok.split(".")
+    forged_payload = _b64(json.dumps(_claims(sub="admin", role="admin")).encode())
+    return [
+        {"id": "es_valid", "alg": "ES256", "label": "Valid ES256 token", "expect": "allow",
+         "attack": "none", "token": ok,
+         "note": "ECDSA P-256 signature from the issuer's EC key."},
+        {"id": "es_tampered", "alg": "ES256", "label": "Tampered ES256 payload",
+         "expect": "block", "attack": "Privilege escalation by claim edit",
+         "token": f"{h}.{forged_payload}.{s}",
+         "note": "Claims rewritten after signing; the ECDSA signature no longer verifies."},
+        {"id": "es_wrong_key", "alg": "ES256", "label": "ES256 signed with attacker's key",
+         "expect": "block", "attack": "Forgery with own EC key, honest kid",
+         "token": _es256(_claims(sub="admin"), key=_EC_ATTACKER_PEM),
+         "note": "Well-formed ES256 token, wrong private key."},
+    ]
+
+
 def make_tokens() -> list[dict[str, str]]:
+    shown = {"alg_none": "none", "key_confusion": "HS256"}
+    return [{**t, "alg": shown.get(t["id"], "RS256")} for t in _rsa_tokens()] + _ecdsa_tokens()
+
+
+def _rsa_tokens() -> list[dict[str, str]]:
     valid = _rs256(_claims())
     head, payload, sig = valid.split(".")
     forged_payload = _b64(json.dumps(_claims(sub="admin", role="admin")).encode())
@@ -209,6 +256,8 @@ def _build_config() -> Config:
     RUNTIME.mkdir(exist_ok=True)
     pem = RUNTIME / "demo-public.pem"
     pem.write_bytes(_PUBLIC_PEM)
+    ec_pem = RUNTIME / "demo-ec-public.pem"
+    ec_pem.write_bytes(_EC_PUBLIC_PEM)
     cfg = Config()
     cfg.upstream = "http://127.0.0.1:3000"
     cfg.mode = Mode.ENFORCE
@@ -222,10 +271,200 @@ def _build_config() -> Config:
         enabled=True, protected_prefixes=("/admin", "/api/internal"),
         fail_closed=True,
         issuers=(IssuerSettings(issuer=ISSUER, audience=AUDIENCE,
-                                allowed_algs=("RS256",),
-                                static_keys={KID: str(pem)}),))
+                                allowed_algs=("RS256", "ES256"),
+                                static_keys={KID: str(pem), EC_KID: str(ec_pem)}),))
     cfg.validate()
     return cfg
+
+
+# --------------------------------------------------------------------------
+# TLS termination: the gateway listener serves HTTPS with a generated
+# self-signed certificate (a production deployment would mount a real one).
+# --------------------------------------------------------------------------
+
+CERT = RUNTIME / "gateway-cert.pem"
+CERT_KEY = RUNTIME / "gateway-key.pem"
+_TLS_INFO: dict[str, Any] = {"enabled": False}
+_TLS_PROBED = 0.0
+
+
+def make_certificate() -> None:
+    RUNTIME.mkdir(exist_ok=True)
+    key = ec.generate_private_key(ec.SECP256R1())
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "csf-gateway.local"),
+                      x509.NameAttribute(NameOID.ORGANIZATION_NAME, "CSF demo")])
+    now = datetime.datetime.now(datetime.timezone.utc)
+    cert = (x509.CertificateBuilder().subject_name(name).issuer_name(name)
+            .public_key(key.public_key()).serial_number(x509.random_serial_number())
+            .not_valid_before(now - datetime.timedelta(minutes=1))
+            .not_valid_after(now + datetime.timedelta(days=30))
+            .add_extension(x509.SubjectAlternativeName([
+                x509.DNSName("localhost"), x509.DNSName("csf-gateway.local"),
+                x509.IPAddress(ipaddress.ip_address("127.0.0.1"))]), critical=False)
+            .sign(key, hashes.SHA256()))
+    CERT.write_bytes(cert.public_bytes(serialization.Encoding.PEM))
+    CERT_KEY.write_bytes(key.private_bytes(
+        serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption()))
+
+
+async def probe_tls() -> dict[str, Any]:
+    """Open a real TLS connection to the gateway and report what it negotiated."""
+    global _TLS_INFO, _TLS_PROBED
+    if time.time() - _TLS_PROBED < 30:
+        return _TLS_INFO
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    try:
+        _r, w = await asyncio.wait_for(
+            asyncio.open_connection("127.0.0.1", 8080, ssl=ctx), timeout=3)
+        obj = w.get_extra_info("ssl_object")
+        cipher = obj.cipher()
+        cert = x509.load_pem_x509_certificate(CERT.read_bytes())
+        _TLS_INFO = {
+            "enabled": True, "version": obj.version(), "cipher": cipher[0],
+            "bits": cipher[2], "subject": "csf-gateway.local",
+            "self_signed": True,
+            "not_after": cert.not_valid_after_utc.isoformat(),
+            "fingerprint": cert.fingerprint(hashes.SHA256()).hex()[:16],
+        }
+        w.close()
+    except (OSError, asyncio.TimeoutError, ssl.SSLError):
+        _TLS_INFO = {"enabled": False}
+    _TLS_PROBED = time.time()
+    return _TLS_INFO
+
+
+# --------------------------------------------------------------------------
+# Alerting: rules evaluated over the recent audit window.
+# --------------------------------------------------------------------------
+
+ALERTS: list[dict[str, Any]] = []
+_ALERT_SEQ = 0
+_ALERT_LAST: dict[str, float] = {}
+ALERT_LOG = logging.getLogger("csf.alerts")
+
+
+def categorize(e: dict[str, Any]) -> str | None:
+    if e.get("decision") == "allow":
+        return None
+    stage, reason = e.get("stage", ""), (e.get("reason") or "").lower()
+    if stage == "s0_auth":
+        return "Token forgery"
+    if stage == "s0_framing":
+        return "Protocol abuse"
+    for prefix, name in (("sqli", "SQL injection"), ("xss", "Cross-site scripting"),
+                         ("shell", "Command injection"), ("cmd", "Command injection"),
+                         ("traversal", "Path traversal"), ("path", "Path traversal")):
+        if reason.startswith(prefix):
+            return name
+    if stage == "s1_rules":
+        for c, name in (("sqli", "SQL injection"), ("xss", "Cross-site scripting"),
+                        ("rce", "Command injection"), ("lfi", "Path traversal")):
+            if "cats=" in reason and c in reason:
+                return name
+        return "Rule match (CRS)"
+    return "Other"
+
+
+def raise_alert(key: str, severity: str, title: str, detail: str,
+                cooldown: float = 45.0) -> None:
+    global _ALERT_SEQ
+    now = time.time()
+    if now - _ALERT_LAST.get(key, 0) < cooldown:
+        return
+    _ALERT_LAST[key] = now
+    _ALERT_SEQ += 1
+    alert = {"id": _ALERT_SEQ, "ts": now, "severity": severity, "title": title,
+             "detail": detail, "rule": key, "acknowledged": False}
+    ALERTS.insert(0, alert)
+    del ALERTS[100:]
+    ALERT_LOG.warning("alert", extra={"fields": alert})
+    try:
+        with (RUNTIME / "alerts.jsonl").open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(alert) + "\n")
+    except OSError:
+        pass
+
+
+def evaluate_alerts() -> None:
+    gw = _gw()
+    if gw is None:
+        return
+    now = time.time()
+    blocks = [e for e in EVENTS if now - e["ts"] <= 30 and e["decision"] == "block"]
+    if len(blocks) >= 15:
+        raise_alert("burst", "critical", "Sustained attack volume",
+                    f"{len(blocks)} requests stopped in the last 30 seconds.")
+    elif len(blocks) >= 5:
+        raise_alert("burst", "warning", "Attack burst detected",
+                    f"{len(blocks)} requests stopped in the last 30 seconds.")
+    auth = [e for e in blocks if e["stage"] == "s0_auth"]
+    if len(auth) >= 3:
+        reasons = sorted({e["reason"].replace("_", " ") for e in auth})
+        raise_alert("credential", "critical", "Credential attack on protected routes",
+                    f"{len(auth)} rejected tokens in 30 s ({', '.join(reasons[:4])}).")
+    by_cat: dict[str, int] = {}
+    for e in blocks:
+        c = categorize(e)
+        if c and c != "Token forgery":
+            by_cat[c] = by_cat.get(c, 0) + 1
+    for cat, n in by_cat.items():
+        if n >= 4:
+            raise_alert("cat:" + cat, "warning", f"Repeated {cat.lower()} attempts",
+                        f"{n} blocked in the last 30 seconds.")
+    if gw.decision_engine.snapshot().get("over_budget"):
+        raise_alert("budget", "warning", "Block rate over budget",
+                    "Observed block rate exceeds the configured ceiling; "
+                    "thresholds may not fit this traffic.", cooldown=120)
+    if gw.circuit_breaker.tripped():
+        raise_alert("breaker", "critical", "Circuit breaker tripped",
+                    "A detection stage is unavailable; the gateway is running degraded.",
+                    cooldown=120)
+
+
+async def alert_loop() -> None:
+    while True:
+        await asyncio.sleep(2)
+        try:
+            evaluate_alerts()
+        except Exception:  # noqa: BLE001 - alerting must never take the console down
+            logging.getLogger("csf").exception("alert evaluation failed")
+
+
+# --------------------------------------------------------------------------
+# Feedback dataset: every request we sent through the gateway, labelled by
+# the gateway's own decision, in the exact text form the S3 model consumes.
+# --------------------------------------------------------------------------
+
+FEEDBACK = RUNTIME / "feedback.jsonl"
+
+
+def persist_feedback(ev: dict[str, Any]) -> None:
+    p = ev.get("payload")
+    if not p:
+        return
+    gw = _gw()
+    headers = [(b"host", b"demo")]
+    if p.get("body"):
+        headers.append((b"content-type", b"application/x-www-form-urlencoded"))
+    ext = extract(p["method"], p["path"], p["query"].encode(), headers,
+                  p["body"].encode(), gw._opts.extraction_limits)
+    rec = {
+        "ts": ev["ts"], "request_id": ev["request_id"],
+        "text": request_document(ext),
+        "label": "attack" if ev["decision"] == "block" else "benign",
+        "attack_class": categorize(ev),
+        "decided_by": ev["stage"] if ev["decision"] == "block" else None,
+        "label_source": "gateway_decision",
+        "mode": ev["mode"], "enforced": ev["enforced"],
+    }
+    try:
+        with FEEDBACK.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(rec) + "\n")
+    except OSError:
+        pass
 
 
 # --------------------------------------------------------------------------
@@ -239,6 +478,8 @@ def _gw() -> Any:
 async def api_status(_: Request) -> JSONResponse:
     gw = _gw()
     return JSONResponse({
+        "tls": await probe_tls(),
+        "algorithms": ["RS256", "ES256"],
         "mode": str(gw._opts.mode),
         "uptime_s": int(time.time() - S.started),
         "stats": gw.stats.snapshot(),
@@ -283,9 +524,44 @@ async def api_tokens(_: Request) -> JSONResponse:
                          "tokens": make_tokens()})
 
 
+async def api_alerts(_: Request) -> JSONResponse:
+    return JSONResponse({"alerts": ALERTS})
+
+
+async def api_alert_ack(request: Request) -> JSONResponse:
+    aid = int(request.path_params["aid"])
+    for a in ALERTS:
+        if a["id"] == aid:
+            a["acknowledged"] = True
+            return JSONResponse(a)
+    return JSONResponse({"error": "not found"}, status_code=404)
+
+
+def _feedback_records() -> list[str]:
+    try:
+        return [ln for ln in FEEDBACK.read_text(encoding="utf-8").splitlines() if ln]
+    except OSError:
+        return []
+
+
+async def api_export_summary(_: Request) -> JSONResponse:
+    recs = [json.loads(ln) for ln in _feedback_records()]
+    attacks = sum(1 for r in recs if r["label"] == "attack")
+    return JSONResponse({"records": len(recs), "attacks": attacks,
+                         "benign": len(recs) - attacks})
+
+
+async def api_export(_: Request) -> Response:
+    body = "\n".join(_feedback_records()) + "\n"
+    return Response(body, media_type="application/x-ndjson", headers={
+        "Content-Disposition": 'attachment; filename="csf-feedback-dataset.jsonl"'})
+
+
 async def api_reset(_: Request) -> JSONResponse:
     EVENTS.clear()
     SENT.clear()
+    ALERTS.clear()
+    _ALERT_LAST.clear()
     gw = _gw()
     for k in vars(type(gw.stats)).get("__slots__", ()):
         setattr(gw.stats, k, 0)
@@ -372,7 +648,9 @@ async def api_send(request: Request) -> JSONResponse:
     url = GATEWAY + path + (f"?{query}" if query else "")
     t0 = time.perf_counter()
     try:
-        async with httpx.AsyncClient(timeout=10) as c:
+        # The gateway's certificate is self-signed, so verification is off for
+        # this loopback hop only.
+        async with httpx.AsyncClient(timeout=10, verify=False) as c:
             r = await c.request(method, url, headers=headers,
                                 content=body.encode() if body else None)
     except httpx.HTTPError as exc:
@@ -385,6 +663,7 @@ async def api_send(request: Request) -> JSONResponse:
     ev = next((e for e in reversed(EVENTS) if e.get("request_id") == rid), None)
     if ev is not None:
         ev["payload"] = SENT[rid]
+        persist_feedback(ev)
     return JSONResponse({
         "status": r.status_code, "request_id": rid, "latency_ms": round(ms, 2),
         "response_body": r.text[:1500], "event": ev,
@@ -437,6 +716,10 @@ routes = [
     Route("/api/mode", api_mode, methods=["POST"]),
     Route("/api/tokens", api_tokens),
     Route("/api/reset", api_reset, methods=["POST"]),
+    Route("/api/alerts", api_alerts),
+    Route("/api/alerts/{aid:int}/ack", api_alert_ack, methods=["POST"]),
+    Route("/api/export/summary", api_export_summary),
+    Route("/api/export/feedback.jsonl", api_export),
     Route("/api/benchmarks", api_benchmarks),
     Route("/api/analyze", api_analyze, methods=["POST"]),
     Route("/api/send", api_send, methods=["POST"]),
@@ -457,14 +740,20 @@ async def amain() -> None:
             h.setLevel(logging.WARNING)
     S.gateway = gateway
 
-    def srv(app: Any, port: int, host: str = "127.0.0.1") -> uvicorn.Server:
+    make_certificate()
+
+    def srv(app: Any, port: int, host: str = "127.0.0.1", tls: bool = False) -> uvicorn.Server:
+        extra: dict[str, Any] = {}
+        if tls:
+            extra = {"ssl_certfile": str(CERT), "ssl_keyfile": str(CERT_KEY)}
         return uvicorn.Server(uvicorn.Config(
-            app, host=host, port=port, log_level="warning", access_log=False))
+            app, host=host, port=port, log_level="warning", access_log=False, **extra))
 
     await asyncio.gather(
         srv(shop_app, 3000).serve(),
-        srv(gateway, 8080).serve(),
+        srv(gateway, 8080, BIND, tls=True).serve(),
         srv(console_app, 8000, BIND).serve(),
+        alert_loop(),
     )
 
 

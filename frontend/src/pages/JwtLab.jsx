@@ -36,7 +36,7 @@ export default function JwtLab({ refreshStatus }) {
       <PageHeader title="Token verification"
         actions={<button className="btn primary" disabled={!info || busy} onClick={all}>
           <Icon name="play" size={15} /> {busy ? 'Running' : 'Test all tokens'}</button>}>
-        RFC 8725 JWT verification on <code>/admin</code>: issuer, audience, expiry and RS256 signature.
+        RFC 8725 JWT verification on <code>/admin</code>: RS256 and ES256 (ECDSA P-256) signatures, issuer, audience and expiry.
       </PageHeader>
 
       {done.length > 0 && (
@@ -48,7 +48,7 @@ export default function JwtLab({ refreshStatus }) {
       <Card>
         <table className="table jwt-table">
           <thead>
-            <tr><th>Token</th><th>What it tries</th><th>Expected</th><th>Result</th><th></th></tr>
+            <tr><th>Token</th><th>Alg</th><th>What it tries</th><th>Expected</th><th>Result</th><th></th></tr>
           </thead>
           <tbody>
             {info?.tokens.map((t) => {
@@ -58,6 +58,7 @@ export default function JwtLab({ refreshStatus }) {
               return [
                 <tr key={t.id}>
                   <td><b>{t.label}</b><div className="muted">{t.note}</div></td>
+                  <td><code>{t.alg}</code></td>
                   <td>{t.attack === 'none' ? <span className="muted">Legitimate request</span> : t.attack}</td>
                   <td><Badge tone={t.expect === 'allow' ? 'good' : 'bad'}>{t.expect === 'allow' ? 'Accept' : 'Reject'}</Badge></td>
                   <td>
@@ -76,7 +77,7 @@ export default function JwtLab({ refreshStatus }) {
                 </tr>,
                 open === t.id && (
                   <tr key={t.id + 'x'} className="inspect">
-                    <td colSpan={5}>
+                    <td colSpan={6}>
                       <div className="grid g2">
                         <div><div className="mini-title">Header</div><pre>{decode(h)}</pre></div>
                         <div><div className="mini-title">Payload</div><pre>{decode(p)}</pre></div>

@@ -40,10 +40,13 @@ services:
       CSF_S1_SOCKET: /run/csf/s1.sock
       CSF_CONSOLE_BIND: 0.0.0.0
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:8000:8000"   # console API
+      - "127.0.0.1:8080:8080"   # gateway (HTTPS, self-signed)
     volumes:
       - s1-socket:/run/csf
+      - runtime:/app/console-api/.runtime
       - ../docs/benchmarks:/app/docs/benchmarks:ro
 
 volumes:
   s1-socket:
+  runtime:
