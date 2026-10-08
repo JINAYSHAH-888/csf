@@ -27,7 +27,9 @@ export default function Dashboard({ status, events, series, go, alerts = [], ack
   const blocked = (s?.blocked ?? 0) + (s?.shadow_would_block ?? 0)
   const allowed = s?.allowed ?? 0
   const rate = total ? ((blocked / total) * 100).toFixed(1) : '0.0'
-  const lat = events.length ? events.reduce((a, e) => a + e.latency_us, 0) / events.length / 1000 : 0
+  // Median, not mean: one cold-start request must not dominate the headline number.
+  const sorted = events.map((e) => e.latency_us).sort((x, y) => x - y)
+  const lat = sorted.length ? sorted[Math.floor(sorted.length / 2)] / 1000 : 0
   const enforce = status?.mode === 'enforce'
   const enabled = (id) => status?.stages?.find((x) => x.id === id)?.enabled
 
@@ -66,7 +68,7 @@ export default function Dashboard({ status, events, series, go, alerts = [], ack
         <Card><Kpi label="Requests inspected" value={<AnimatedNumber value={total} />} series={series} /></Card>
         <Card><Kpi label="Threats stopped" value={<AnimatedNumber value={blocked} />} tone="bad" sub={enforce ? '' : 'would-block'} /></Card>
         <Card><Kpi label="Attack share" value={<AnimatedNumber value={Number(rate)} decimals={1} />} unit="%" tone={Number(rate) > 40 ? 'warn' : 'good'} /></Card>
-        <Card><Kpi label="Mean inspection latency" value={<AnimatedNumber value={lat} decimals={1} />} unit="ms" /></Card>
+        <Card><Kpi label="Median inspection latency" value={<AnimatedNumber value={lat} decimals={1} />} unit="ms" /></Card>
       </div>
 
         <Card title="Inspection pipeline" hint="Cost-ordered: cheap checks first, costlier stages only when needed"
