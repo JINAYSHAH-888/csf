@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../api'
 import Cascade, { buildRows } from '../components/Cascade'
 import { PageHeader, Card, Icon } from '../components/ui'
+import Scenarios from './Scenarios'
 
 export default function AttackLab({ status, refreshStatus }) {
   const [presets, setPresets] = useState([])
@@ -12,6 +13,7 @@ export default function AttackLab({ status, refreshStatus }) {
   const [busy, setBusy] = useState(false)
   const [custom, setCustom] = useState(false)
   const [err, setErr] = useState('')
+  const [view, setView] = useState('single')
 
   useEffect(() => { api.presets().then(setPresets).catch(() => {}) }, [])
   const groups = [...new Set(presets.map((p) => p.group))]
@@ -35,8 +37,13 @@ export default function AttackLab({ status, refreshStatus }) {
   return (
     <div className="page">
       <PageHeader title="Threat simulator">
-        Send a payload through the gateway and inspect the verdict of every stage.
+        Send attacks through the gateway and inspect every stage's verdict.
       </PageHeader>
+      <div className="seg2">
+        <button className={view === 'single' ? 'on' : ''} onClick={() => setView('single')}>Single request</button>
+        <button className={view === 'suite' ? 'on' : ''} onClick={() => setView('suite')}>Full suite</button>
+      </div>
+      {view === 'suite' ? <Scenarios refreshStatus={refreshStatus} /> : (<>
 
       <div className="lab">
         <Card title="Payload library" className="lab-pick">
@@ -129,6 +136,7 @@ export default function AttackLab({ status, refreshStatus }) {
           )}
         </div>
       </div>
+      </>)}
     </div>
   )
 }

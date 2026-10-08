@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { api } from './api'
 import { Icon } from './components/ui'
 import Dashboard from './pages/Dashboard'
-import Scenarios from './pages/Scenarios'
 import AttackLab from './pages/AttackLab'
 import JwtLab from './pages/JwtLab'
 import Traffic from './pages/Traffic'
@@ -16,7 +15,6 @@ const NAV = [
     ['traffic', 'Live traffic', 'activity', Traffic],
   ] },
   { group: 'Validate', items: [
-    ['scenarios', 'Scenario suite', 'list', Scenarios],
     ['lab', 'Threat simulator', 'target', AttackLab],
     ['jwt', 'Token verification', 'key', JwtLab],
   ] },

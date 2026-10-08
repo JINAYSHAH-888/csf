@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
-import { PageHeader, Card, Badge, Icon } from '../components/ui'
+import { Card, Badge, Icon } from '../components/ui'
 
 const STEPS = [
   { id: 'benign', title: 'Legitimate product search', cls: 'Baseline', expect: 'allow',
@@ -61,18 +61,16 @@ export default function Scenarios({ refreshStatus }) {
 
   return (
     <div className="page">
-      <PageHeader title="Scenario suite"
-        actions={<button className="btn primary" disabled={running || !ready} onClick={runAll}>
-          <Icon name="play" size={15} /> {running ? 'Running' : 'Run suite'}</button>}>
-        Reference attacks and baselines executed against the live gateway.
-      </PageHeader>
-
       <Card className="suite-bar">
         <div className="suite-top">
           <div><b className="suite-num">{passed}</b><span className="suite-of"> / {STEPS.length} passed</span></div>
+          <div className="suite-actions">
           <Badge tone={done.length === 0 ? 'neutral' : done.length < STEPS.length ? 'neutral' : passed === STEPS.length ? 'good' : 'warn'} dot>
             {done.length === 0 ? 'Not run' : done.length < STEPS.length ? 'Running' : passed === STEPS.length ? 'All scenarios passed' : 'Failures detected'}
           </Badge>
+          <button className="btn primary" disabled={running || !ready} onClick={runAll}>
+            <Icon name="play" size={15} /> {running ? 'Running' : 'Run suite'}</button>
+          </div>
         </div>
         <div className="suite-track"><div className="suite-fill" style={{ width: pct + '%' }} /></div>
       </Card>
