@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import os
 import collections
 import hashlib
 import hmac
@@ -36,7 +37,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse
 from starlette.routing import Route
 
-from csf.config import AuthConfig, Config, IssuerSettings, S2Settings
+from csf.config import AuthConfig, Config, IssuerSettings, S1Settings, S2Settings
 from csf.decision import DecisionEngine, StageEvidence
 from csf.extraction import extract
 from csf.main import build_app
@@ -51,6 +52,8 @@ GATEWAY = "http://127.0.0.1:8080"
 ISSUER = "https://csf.demo/"
 AUDIENCE = "csf-api"
 KID = "demo-1"
+# 0.0.0.0 inside a container so the published port works; loopback otherwise.
+BIND = os.environ.get("CSF_CONSOLE_BIND", "127.0.0.1")
 
 # --------------------------------------------------------------------------
 # Demo keys + token factory
@@ -211,6 +214,10 @@ def _build_config() -> Config:
     cfg.mode = Mode.ENFORCE
     cfg.log_json = True
     cfg.s2 = S2Settings(enabled=True)
+    # S1 (Coraza/CRS) is reachable only from the docker stack, over a unix
+    # socket shared with the Go sidecar container.
+    if os.environ.get("CSF_S1_SOCKET"):
+        cfg.s1 = S1Settings(enabled=True, socket_path=os.environ["CSF_S1_SOCKET"])
     cfg.auth = AuthConfig(
         enabled=True, protected_prefixes=("/admin", "/api/internal"),
         fail_closed=True,
@@ -242,8 +249,9 @@ async def api_status(_: Request) -> JSONResponse:
         "stages": [
             {"id": "s0_framing", "label": "S0 Framing", "enabled": True},
             {"id": "s0_auth", "label": "S0 JWT auth", "enabled": True},
-            {"id": "s1_rules", "label": "S1 CRS rules (Coraza)", "enabled": False,
-             "note": "needs Go sidecar (docker compose); off in this demo"},
+            {"id": "s1_rules", "label": "S1 CRS rules (Coraza)",
+             "enabled": bool(os.environ.get("CSF_S1_SOCKET")),
+             "note": "needs the Go sidecar (docker compose)"},
             {"id": "s2_semantic", "label": "S2 Semantic parse", "enabled": True},
             {"id": "s3_model", "label": "S3 Learned", "enabled": False,
              "note": "off by default (documented negative result, ADR-0017)"},
@@ -447,14 +455,14 @@ async def amain() -> None:
             h.setLevel(logging.WARNING)
     S.gateway = gateway
 
-    def srv(app: Any, port: int) -> uvicorn.Server:
+    def srv(app: Any, port: int, host: str = "127.0.0.1") -> uvicorn.Server:
         return uvicorn.Server(uvicorn.Config(
-            app, host="127.0.0.1", port=port, log_level="warning", access_log=False))
+            app, host=host, port=port, log_level="warning", access_log=False))
 
     await asyncio.gather(
         srv(shop_app, 3000).serve(),
         srv(gateway, 8080).serve(),
-        srv(console_app, 8000).serve(),
+        srv(console_app, 8000, BIND).serve(),
     )
 
 

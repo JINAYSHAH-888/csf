@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import { PageHeader, Card, Badge, Icon } from '../components/ui'
 
 function decode(part) {
   try {
     const s = part.replace(/-/g, '+').replace(/_/g, '/')
-    return JSON.parse(atob(s + '='.repeat((4 - (s.length % 4)) % 4)))
-  } catch { return null }
+    return JSON.stringify(JSON.parse(atob(s + '='.repeat((4 - (s.length % 4)) % 4))), null, 2)
+  } catch { return '(not decodable)' }
 }
 
 export default function JwtLab({ refreshStatus }) {
   const [info, setInfo] = useState(null)
   const [results, setResults] = useState({})
   const [busy, setBusy] = useState(false)
+  const [open, setOpen] = useState(null)
 
   useEffect(() => { api.tokens().then(setInfo).catch(() => {}) }, [])
 
@@ -22,7 +24,7 @@ export default function JwtLab({ refreshStatus }) {
   }
   async function all() {
     setBusy(true)
-    for (const t of info.tokens) await test(t)
+    for (const t of info.tokens) { await test(t); await new Promise((r) => setTimeout(r, 200)) }
     setBusy(false)
   }
 
@@ -31,47 +33,63 @@ export default function JwtLab({ refreshStatus }) {
 
   return (
     <div className="page">
-      <h1>JWT Lab</h1>
-      <p className="lead">
-        Each button sends <code>GET /admin</code> with a different token. The gateway verifies signatures cryptographically
-        (RFC 8725) — only the genuinely valid RS256 token may pass. {info && <>Issuer <code>{info.issuer}</code>, audience <code>{info.audience}</code>.</>}
-      </p>
-      <div className="toolbar">
-        <button className="primary" disabled={!info || busy} onClick={all}>{busy ? 'Running…' : 'Run all attacks'}</button>
-        {done.length > 0 && <span className="score">{correct}/{done.length} handled correctly</span>}
-      </div>
-      <div className="tokens">
-        {info?.tokens.map((t) => {
-          const r = results[t.id]
-          const [h, p] = t.token.split('.')
-          const ok = r && (r.status === 200) === (t.expect === 'allow')
-          return (
-            <div key={t.id} className={'card tok ' + (r ? (ok ? 'ok' : 'bad') : '')}>
-              <div className="tok-head">
-                <div>
-                  <b>{t.label}</b>
-                  <div className="atk">{t.attack === 'none' ? 'legitimate request' : 'attack: ' + t.attack}</div>
-                </div>
-                <button onClick={() => test(t)}>Send</button>
-              </div>
-              <p className="hint">{t.note}</p>
-              <div className="jwt">
-                <span className="j1">{h.slice(0, 18)}…</span>.<span className="j2">{p.slice(0, 18)}…</span>.<span className="j3">sig</span>
-              </div>
-              <details>
-                <summary>decoded</summary>
-                <pre>{JSON.stringify(decode(h), null, 1)}{'\n'}{JSON.stringify(decode(p), null, 1)}</pre>
-              </details>
-              {r && (
-                <div className={'res ' + (r.status === 200 ? 'pass' : 'block')}>
-                  HTTP {r.status} · {r.status === 200 ? 'admin panel reached' : 'rejected: ' + (r.event?.reason || '')}
-                  <span className="exp"> (expected {t.expect})</span>
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
+      <PageHeader title="Token lab"
+        actions={<button className="btn primary" disabled={!info || busy} onClick={all}>
+          <Icon name="play" size={15} /> {busy ? 'Running…' : 'Test all tokens'}</button>}>
+        The admin page requires a signed login token (JWT). Each row below is a different token sent to
+        <code>/admin</code>. Only the genuine one should get in.
+      </PageHeader>
+
+      {done.length > 0 && (
+        <div className={'alert ' + (correct === done.length ? 'good' : 'warn')}>
+          {correct} of {done.length} tokens were handled correctly.
+        </div>
+      )}
+
+      <Card>
+        <table className="table jwt-table">
+          <thead>
+            <tr><th>Token</th><th>What it tries</th><th>Expected</th><th>Result</th><th></th></tr>
+          </thead>
+          <tbody>
+            {info?.tokens.map((t) => {
+              const r = results[t.id]
+              const ok = r && (r.status === 200) === (t.expect === 'allow')
+              const [h, p] = t.token.split('.')
+              return [
+                <tr key={t.id}>
+                  <td><b>{t.label}</b><div className="muted">{t.note}</div></td>
+                  <td>{t.attack === 'none' ? <span className="muted">Legitimate request</span> : t.attack}</td>
+                  <td><Badge tone={t.expect === 'allow' ? 'good' : 'bad'}>{t.expect === 'allow' ? 'Accept' : 'Reject'}</Badge></td>
+                  <td>
+                    {r ? (
+                      <div>
+                        <Badge tone={r.status === 200 ? 'good' : 'bad'}>{r.status === 200 ? 'Accepted' : 'Rejected'} · {r.status}</Badge>
+                        {r.status !== 200 && <div className="muted">{(r.event?.reason || '').replaceAll('_', ' ')}</div>}
+                        {!ok && <div className="muted bad-t">Unexpected</div>}
+                      </div>
+                    ) : <span className="muted">Not tested</span>}
+                  </td>
+                  <td className="actions">
+                    <button className="btn sm" onClick={() => test(t)}>Test</button>
+                    <button className="btn sm ghost" onClick={() => setOpen(open === t.id ? null : t.id)}>{open === t.id ? 'Hide' : 'Inspect'}</button>
+                  </td>
+                </tr>,
+                open === t.id && (
+                  <tr key={t.id + 'x'} className="inspect">
+                    <td colSpan={5}>
+                      <div className="grid g2">
+                        <div><div className="mini-title">Header</div><pre>{decode(h)}</pre></div>
+                        <div><div className="mini-title">Payload</div><pre>{decode(p)}</pre></div>
+                      </div>
+                    </td>
+                  </tr>
+                ),
+              ]
+            })}
+          </tbody>
+        </table>
+      </Card>
     </div>
   )
 }
