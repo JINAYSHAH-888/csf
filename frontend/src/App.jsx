@@ -8,6 +8,7 @@ import JwtLab from './pages/JwtLab'
 import Traffic from './pages/Traffic'
 import Benchmarks from './pages/Benchmarks'
 import Palette from './components/Palette'
+import Logo from './components/Logo'
 
 const NAV = [
   { group: 'Monitor', items: [
@@ -51,6 +52,7 @@ export default function App() {
   const [series, setSeries] = useState([])
   const [gen, setGen] = useState(false)
   const [pal, setPal] = useState(false)
+  const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark')
   const seq = useRef(0)
   const last = useRef({ t: Date.now(), total: 0 })
 
@@ -100,11 +102,18 @@ export default function App() {
     return () => window.removeEventListener('keydown', h)
   }, [])
 
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    try { localStorage.setItem('csf-theme', theme) } catch { /* storage unavailable */ }
+  }, [theme])
+  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
+
   const reset = () => api.reset().then(() => { setEvents([]); setSeries([]); seq.current = 0; refresh() })
 
   const commands = [
     ...ALL.map(([id, label, icon]) => ({ group: 'Go to', label, icon, run: () => go(id) })),
     ...MODES.map(([id, label]) => ({ group: 'Gateway mode', label: `Set mode: ${label}`, icon: 'shield', run: () => api.setMode(id).then(refresh) })),
+    { group: 'Action', label: theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme', icon: theme === 'dark' ? 'sun' : 'moon', run: toggleTheme },
     { group: 'Action', label: gen ? 'Stop traffic generator' : 'Start traffic generator', icon: 'zap', run: () => setGen((v) => !v) },
     { group: 'Action', label: 'Clear counters and log', icon: 'reset', run: reset },
   ]
@@ -117,7 +126,7 @@ export default function App() {
     <div className="shell">
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand-mark"><Icon name="shieldcheck" size={20} /></span>
+          <span className="brand-mark"><Logo size={38} /></span>
           <div>
             <div className="brand-name">CSF</div>
             <div className="brand-sub">Cascaded Semantic Firewall</div>
@@ -148,6 +157,9 @@ export default function App() {
             <button className="kbd-hint" onClick={() => setPal(true)}><Icon name="search" size={14} /> Search <kbd>Ctrl K</kbd></button>
             <button className={'gen' + (gen ? ' on' : '')} onClick={() => setGen(!gen)}>
               <span className="gen-dot" /> {gen ? 'Traffic generator on' : 'Traffic generator off'}
+            </button>
+            <button className="theme-btn" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} aria-label="Toggle theme">
+              <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={16} />
             </button>
             <div className="segmented">
               {MODES.map(([id, label]) => (

@@ -23,6 +23,8 @@ const PATHS = {
   server: 'M4 5h16v6H4zM4 13h16v6H4zM8 8h.01M8 16h.01',
   layers: 'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5M3 17l9 5 9-5',
   search: 'M11 18a7 7 0 100-14 7 7 0 000 14zM21 21l-5-5',
+  sun: 'M12 16a4 4 0 100-8 4 4 0 000 8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4',
+  moon: 'M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z',
 }
 
 export function Icon({ name, size = 18 }) {
