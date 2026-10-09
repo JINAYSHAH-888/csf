@@ -1,0 +1,49 @@
+{
+  "counts": {
+    "CSIC": 2006,
+    "ECML": 4200
+  },
+  "measured_at": "2026-10-06T09:54:39+0530",
+  "residual_by_operating_point": {
+    "configured thresholds|CSIC": {
+      "both_pct": 54.86935866983374,
+      "claimed_n": 421,
+      "combined_fpr_pct": 0.0,
+      "missed_pct": 11.163895486935866,
+      "s1_only_pct": 31.116389548693586,
+      "s1_threshold": 11,
+      "s2_only_pct": 2.8503562945368173,
+      "s2_threshold": 4.0
+    },
+    "configured thresholds|ECML": {
+      "both_pct": 55.92857142857143,
+      "claimed_n": 2800,
+      "combined_fpr_pct": 67.14285714285714,
+      "missed_pct": 3.607142857142857,
+      "s1_only_pct": 40.07142857142857,
+      "s1_threshold": 11,
+      "s2_only_pct": 0.3928571428571429,
+      "s2_threshold": 4.0
+    },
+    "per-corpus 0.1% FPR|CSIC": {
+      "both_pct": 55.58194774346793,
+      "claimed_n": 421,
+      "combined_fpr_pct": 0.0,
+      "missed_pct": 10.688836104513063,
+      "s1_only_pct": 30.403800475059384,
+      "s1_threshold": 11,
+      "s2_only_pct": 3.32541567695962,
+      "s2_threshold": 0.5
+    },
+    "per-corpus 0.1% FPR|ECML": {
+      "both_pct": 7.142857142857142,
+      "claimed_n": 2800,
+      "combined_fpr_pct": 0.0,
+      "missed_pct": 59.17857142857142,
+      "s1_only_pct": 30.928571428571427,
+      "s1_threshold": 44,
+      "s2_only_pct": 2.75,
+      "s2_threshold": 8.5
+    }
+  }
+}

@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: csf-gateway
+  namespace: csf
+  labels: { app: csf-gateway }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: csf-gateway }
+  template:
+    metadata:
+      labels: { app: csf-gateway }
+      annotations:
+        # Prometheus scrape (same port as the gateway; path /metrics).
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+        # The S1 socket lives on a shared emptyDir. Both containers run as uid
+        # 65532; fsGroup makes the emptyDir group-writable so the sidecar (uid
+        # 65532) can bind the socket and the gateway (same uid) can connect --
+        # the k8s equivalent of the socket-ownership fix in ADR-0010.
+        fsGroup: 65532
+      containers:
+        # --- S1: Coraza + CRS, internal to the pod, no service port ---------
+        - name: s1
+          image: csf-s1:dev
+          args:
+            - -socket=/run/csf/s1.sock
+            - -crs=/opt/crs
+            - -exclusions=/etc/csf/crs/exclusions.conf
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            capabilities: { drop: ["ALL"] }
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits: { cpu: "500m", memory: "256Mi" }
+          volumeMounts:
+            - { name: socket, mountPath: /run/csf }
+            - { name: crs-exclusions, mountPath: /etc/csf/crs, readOnly: true }
+            - { name: tmp, mountPath: /tmp }       # Coraza's startup fs probe
+        # --- Gateway: S0-S4 data plane --------------------------------------
+        - name: gateway
+          image: csf-gateway:dev
+          args: ["--config", "/etc/csf/gateway.json"]
+          ports:
+            - { name: http, containerPort: 8080 }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsUser: 65532
+            capabilities: { drop: ["ALL"] }
+          livenessProbe:
+            # Liveness must NOT depend on JWKS/upstream (a dependency outage
+            # would restart pods uselessly). /healthz is process-only.
+            httpGet: { path: /healthz, port: 8080 }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          readinessProbe:
+            # /readyz fails closed when auth keys are missing or the breaker is
+            # tripped, pulling the pod out of the LB pool rather than serving
+            # requests it cannot adjudicate.
+            httpGet: { path: /readyz, port: 8080 }
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+            requests: { cpu: "250m", memory: "256Mi" }
+            limits: { cpu: "1", memory: "512Mi" }
+          volumeMounts:
+            - { name: socket, mountPath: /run/csf }
+            - { name: gateway-config, mountPath: /etc/csf, readOnly: true }
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - { name: socket, emptyDir: {} }           # the shared S1 unix socket
+        - name: tmp
+          emptyDir: { medium: Memory, sizeLimit: 32Mi }
+        - name: gateway-config
+          configMap:
+            name: csf-config
+            items: [{ key: gateway.json, path: gateway.json }]
+        - name: crs-exclusions
+          configMap:
+            name: csf-config
+            items: [{ key: exclusions.conf, path: exclusions.conf }]
