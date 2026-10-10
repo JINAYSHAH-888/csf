@@ -1,0 +1,45 @@
+{
+  "built_at": "2026-10-06T01:25:32+0530",
+  "seed": 20261001,
+  "splitting": "by template group (endpoint + param names + value types), never by row",
+  "stats": {
+    "input": 32808,
+    "exact_duplicates": 17524,
+    "label_conflicts": 0,
+    "kept": 15284,
+    "groups": 3372,
+    "by_label": {
+      "benign": 5476,
+      "other": 7007,
+      "sqli": 727,
+      "xss": 1626,
+      "cmdi": 448
+    },
+    "by_source": {
+      "csic2010": 12483,
+      "libinjection-bypass": 474,
+      "sqlifuzzer": 86,
+      "jbrofuzz-sqli": 167,
+      "xss-ismailtasdelen": 799,
+      "xssdb": 215,
+      "xss-packetstorm": 388,
+      "jbrofuzz-xss": 224,
+      "cmdi-windows": 448
+    }
+  },
+  "splits": {
+    "train": {
+      "n": 10540,
+      "sha256": "73eb59f3c718c31f03cf4dfc0b40d88d62a7979ebd4c75251b7199703da3af17"
+    },
+    "val": {
+      "n": 2006,
+      "sha256": "6e8f72101678a74a8da8547777608b2f7c80ae1bd535ea367da10553101c20ee"
+    },
+    "test": {
+      "n": 2738,
+      "sha256": "32fa56f88961d974ea3e9c17e692e2b24d54a820a13f8fd75e18381ac8d5d37d"
+    }
+  },
+  "frozen_test_warning": "test.jsonl is the frozen holdout. Training or threshold derivation on it invalidates every number in the evaluation. Its sha256 is recorded here so that can be checked."
+}

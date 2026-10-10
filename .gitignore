@@ -1,40 +1,39 @@
+# Private repo: nearly everything is committed, including the dataset splits,
+# the raw corpora, and the trained model. Only three kinds of things stay out.
+
+# 1. Secrets. The repo is private, but a leaked key is a leaked key the moment
+#    the repo is ever shared, forked, or the account is compromised.
 *.env
 .env*
 !.env.example
 *.pem
 *.key
 !testdata/**/*.pem
-bin/
-dist/
-__pycache__/
-*.pyc
+
+# 2. Things that are platform-specific or regenerable, so committing them would
+#    BREAK a clone on another machine or just add churn (not a privacy choice).
 .venv/
 venv/
-model/artifacts/
-*.onnx
-*.pt
-data/raw/
-data/interim/
-coverage.out
-.DS_Store
-.venv/
+__pycache__/
+*.pyc
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 htmlcov/
-*.egg-info/
-# vendor/crs is intentionally COMMITTED (vendored OWASP CRS rules,
-# Apache-2.0) so the sidecar image builds in CI and on a fresh clone.
-vendor/crs/.git/
-data/raw/
-data/processed/
-model/artifacts/
-
-# compiled Go binary (built by `go build`)
-s1-sidecar/s1-sidecar
-
-# Cleanup (final review): a nested duplicate tree, build artifacts, test output
-/csf/
-csf-backend.zip
 .coverage
+coverage.out
+*.egg-info/
+bin/
+dist/
 .DS_Store
+s1-sidecar/s1-sidecar
+vendor/crs/.git/
+
+# 3. Local-only accidents from the folder move: a full nested DUPLICATE of the
+#    whole project (csf/, ~676 MB, same files again) and the export zips.
+/csf/
+*.zip
+
+# NOTE: data/ (splits + raw CSIC/ECML corpora) and model/artifacts/ (the trained
+# S3 model) are now COMMITTED. Keep this repo PRIVATE -- the corpora are licensed
+# datasets whose terms restrict redistribution.

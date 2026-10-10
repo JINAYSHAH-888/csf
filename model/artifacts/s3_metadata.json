@@ -1,0 +1,34 @@
+{
+  "trained_at": "2026-10-10T15:55:33+0530",
+  "provenance_features": false,
+  "train_n": 10540,
+  "val_n": 2006,
+  "ecml_n": 4200,
+  "test_touched": false,
+  "vectoriser": "char_wb 2-5grams, min_df=3, max_features=200k",
+  "classifier": "LogisticRegression C=4.0 balanced, isotonic-calibrated",
+  "val_thresholds": {
+    "0.01": {
+      "threshold": 0.5392203765227022,
+      "recall": 100.0,
+      "fpr": 1.25
+    },
+    "0.001": {
+      "threshold": 0.8877947804758097,
+      "recall": 92.87410926365796,
+      "fpr": 0.17857142857142858
+    }
+  },
+  "ecml_thresholds": {
+    "0.01": {
+      "threshold": 0.8882219282421328,
+      "recall": 67.46428571428571,
+      "fpr": 29.714285714285715
+    },
+    "0.001": {
+      "threshold": 0.8882219282421328,
+      "recall": 67.46428571428571,
+      "fpr": 29.714285714285715
+    }
+  }
+}
