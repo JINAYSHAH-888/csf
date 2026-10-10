@@ -32,3 +32,9 @@ model/artifacts/
 
 # compiled Go binary (built by `go build`)
 s1-sidecar/s1-sidecar
+
+# Cleanup (final review): a nested duplicate tree, build artifacts, test output
+/csf/
+csf-backend.zip
+.coverage
+.DS_Store
