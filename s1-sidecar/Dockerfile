@@ -6,11 +6,9 @@
 # could be a deployable unit; until it builds reproducibly it is not one.
 
 # --- build -----------------------------------------------------------------
-# NOT digest-pinned, and that is a known gap (ADR-0010). A floating tag means
-# a later build is a different build, so no benchmark taken from this image
-# should be called reproducible until the base is pinned by digest.
-# Digest-pinned to go1.27.2 (patches the net/http, crypto/tls, textproto
-# CVEs that go1.27.1 carried). Re-pin on an intentional toolchain bump.
+# Digest-pinned to go1.27.2 for reproducibility AND to patch the net/http,
+# crypto/tls and net/textproto CVEs that go1.27.1 carried (GO-2026-66xx,
+# caught by govulncheck in the final review). Re-pin on an intentional bump.
 FROM golang:1.27-alpine@sha256:f92b6ef800e499660581efdabdf25d9d817a9d124eaf900924f0504e7e27e12d AS build
 
 WORKDIR /src

@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:f230fcaa-7637-4d58-8345-8e7ca1722740",
+  "serialNumber": "urn:uuid:14c7cca3-f87e-4e9e-b3d9-bc900d7859f7",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-10-10T16:14:07+05:30",
+    "timestamp": "2026-10-10T16:26:58+05:30",
     "tools": [
       {
         "vendor": "CycloneDX",
@@ -46,11 +46,11 @@
       }
     ],
     "component": {
-      "bom-ref": "pkg:golang/github.com/csf-project/csf/s1-sidecar@v0.0.0-20261010103315-7b541b1deafa?type=module",
+      "bom-ref": "pkg:golang/github.com/csf-project/csf/s1-sidecar@v0.0.0-20261010104754-ac7ca6158d3d?type=module",
       "type": "application",
       "name": "github.com/csf-project/csf/s1-sidecar",
-      "version": "v0.0.0-20261010103315-7b541b1deafa",
-      "purl": "pkg:golang/github.com/csf-project/csf/s1-sidecar@v0.0.0-20261010103315-7b541b1deafa?goarch=arm64\u0026goos=darwin\u0026type=module",
+      "version": "v0.0.0-20261010104754-ac7ca6158d3d",
+      "purl": "pkg:golang/github.com/csf-project/csf/s1-sidecar@v0.0.0-20261010104754-ac7ca6158d3d?goarch=arm64\u0026goos=darwin\u0026type=module",
       "externalReferences": [
         {
           "url": "https://github.com/csf-project/csf/s1-sidecar",
@@ -413,7 +413,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:golang/github.com/csf-project/csf/s1-sidecar@v0.0.0-20261010103315-7b541b1deafa?type=module",
+      "ref": "pkg:golang/github.com/csf-project/csf/s1-sidecar@v0.0.0-20261010104754-ac7ca6158d3d?type=module",
       "dependsOn": [
         "pkg:golang/github.com/corazawaf/coraza/v3@v3.8.0?type=module"
       ]

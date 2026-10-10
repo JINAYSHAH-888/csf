@@ -1,0 +1,5 @@
+.runtime/
+.server.log
+__pycache__/
+.vite.log
+.compose.log

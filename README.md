@@ -40,6 +40,8 @@ on.
 | S0 admission | per-principal rate limit, circuit breaker, cap-as-signal | ✅ ADR-0013 |
 | Config integrity | fingerprint + Ed25519/HMAC signature, safe-fail | ✅ ADR-0014/0017 |
 | Supply chain | CycloneDX SBOMs + pip-audit + govulncheck | ✅ 0 known vulns |
+| Observability | `/metrics` (Prometheus), `/statusz`, `/healthz`, `/readyz` | ✅ ADR-0018 |
+| Deployment | compose + Kubernetes manifests, operations runbook | ✅ ADR-0018 |
 | Containers + CI | compose stack, GitHub Actions gate, `uv.lock` | ✅ |
 
 ## Headline measured results (see `docs/benchmarks/` and `docs/phases/`)
@@ -59,7 +61,12 @@ on.
 ```bash
 docker compose up -d --build     # gateway (S0–S4) + S1 Coraza/CRS sidecar
 curl localhost:8080/statusz      # machine-readable operator status
+curl localhost:8080/metrics      # Prometheus metrics (latency histogram, decisions)
 ```
+
+Kubernetes manifests are in `deployment/kubernetes/`; operations procedures
+(enforce cutover, breaker trips, key rotation, rollback) in
+`docs/runbooks/operations.md`.
 
 Local development:
 
@@ -84,7 +91,7 @@ from them.
 ## Documentation
 
 - `docs/security/threat-model.md` — trust boundaries, adversaries A1–A6, T1–T8, out-of-scope
-- `docs/adr/` — 17 architecture decision records (every non-obvious choice, with its measurement)
+- `docs/adr/` — 18 architecture decision records (every non-obvious choice, with its measurement)
 - `docs/phases/` — completion reports, each with measured results **and** stated limitations
 - `docs/third-party.md` + `docs/security/sbom*.json` — dependencies and licenses (SafeLine is GPL-3.0, reference-only)
 

@@ -81,9 +81,9 @@ revealed it.
 
 ## Known limitations
 
-- Base images are tagged, not digest-pinned. The Dockerfile comment claims
-  digest pinning; that is **aspirational and currently false** — it should be
-  done before any release build is called reproducible.
+- Base images are now **digest-pinned** (ADR-0018): golang, python, distroless
+  and the uv stage all carry `@sha256:` digests, so a rebuild is the same build.
+  Re-pin on an intentional base bump.
 - `read_only: true` required a tmpfs at `/tmp`: Coraza probes for filesystem
   access at startup and aborts on a fully read-only root. Coraza suggests a
   `no_fs_access` build tag instead; that changes the binary, and this binary is

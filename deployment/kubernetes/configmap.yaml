@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: csf-config
+  namespace: csf
+data:
+  # The gateway policy. Ships in SHADOW mode: enforcement is a deliberate
+  # change made after calibrating this deployment's operating point
+  # (backend/scripts/calibrate.py, ADR-0017). `upstream` must point at the
+  # service CSF protects.
+  gateway.json: |
+    {
+      "listen_host": "0.0.0.0",
+      "listen_port": 8080,
+      "upstream": "http://app.default.svc.cluster.local:8080",
+      "mode": "shadow",
+      "log_level": "info",
+      "log_json": true,
+      "s1": { "enabled": true, "socket_path": "/run/csf/s1.sock",
+              "score_field": "attack", "tau_high": 11.0, "tau_low": 4.0 },
+      "s2": { "enabled": true },
+      "s3": { "enabled": false },
+      "decision": { "max_block_rate_pct": 5.0, "budget_min_samples": 200,
+                    "budget_window": 2000 },
+      "rate_limit": { "enabled": true, "rate_per_second": 50.0, "burst": 100.0 },
+      "circuit_breaker": { "enabled": true, "trip_threshold_pct": 25.0,
+                           "min_samples": 50, "window": 500 }
+    }
+  exclusions.conf: |
+    # Per-application CRS exclusions go here (see configs/crs/). Empty by default.

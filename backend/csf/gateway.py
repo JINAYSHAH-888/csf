@@ -27,6 +27,7 @@ from csf.extraction import ExtractionLimits, extract
 from csf.extraction import Result as ExtractionResult
 from csf.framing import FramingLimits
 from csf.jwtverify import VerificationError, Verifier
+from csf.metrics import Counter, Gauge, Histogram, Registry
 from csf.resilience import CircuitBreaker, CircuitBreakerConfig, RateLimitConfig, RateLimiter
 from csf.telemetry import Mode
 from csf.verdict import Decision, Stage, Verdict
@@ -60,8 +61,9 @@ class Detector(Protocol):
 
 @dataclass(slots=True)
 class Stats:
-    """Process-lifetime counters. Prometheus metrics arrive in Phase 9; these
-    exist so /statusz and tests have something to assert on."""
+    """Process-lifetime counters for /statusz. Scrapeable Prometheus metrics
+    (counters + latency histogram) are exposed separately at /metrics; these
+    JSON counters remain for the human-readable status snapshot and tests."""
 
     total: int = 0
     allowed: int = 0
@@ -143,6 +145,7 @@ class Gateway:
         self.rate_limiter = RateLimiter(options.rate_limit or RateLimitConfig())
         self.circuit_breaker = CircuitBreaker(
             options.circuit_breaker or CircuitBreakerConfig())
+        self._build_metrics()
         self._refresh_tasks: set[asyncio.Task[Any]] = set()
         self._client = httpx.AsyncClient(
             base_url=options.upstream,
@@ -184,6 +187,42 @@ class Gateway:
     def _is_protected(self, path: str) -> bool:
         return any(path.startswith(p) for p in self._opts.protected_prefixes)
 
+    def _build_metrics(self) -> None:
+        """Per-gateway Prometheus registry. Instance-level (not module global)
+        so multiple gateways in one process -- e.g. tests -- stay isolated."""
+        r = Registry()
+        self.metrics = r
+        self._m_requests = r.register(Counter(
+            "csf_requests", "Requests adjudicated, by final decision."))
+        self._m_duration = r.register(Histogram(
+            "csf_request_duration_seconds",
+            "End-to-end gateway adjudication latency."))
+        self._m_stage_blocks = r.register(Counter(
+            "csf_stage_blocks", "Enforced blocks, by the stage that caused them."))
+        self._m_up = r.register(Gauge("csf_up", "1 if the gateway is serving."))
+        self._m_build = r.register(Gauge(
+            "csf_build_info", "Build info; value is always 1."))
+        self._m_block_rate = r.register(Gauge(
+            "csf_block_rate_ratio", "Observed block rate over the decision window."))
+        self._m_breaker = r.register(Gauge(
+            "csf_circuit_breaker_tripped", "1 if the breaker is tripped."))
+        self._m_over_budget = r.register(Gauge(
+            "csf_block_rate_over_budget", "1 if the block rate exceeds budget."))
+        self._m_rl_tracked = r.register(Gauge(
+            "csf_rate_limit_tracked_principals", "Principals with a live bucket."))
+
+    def _render_metrics(self) -> bytes:
+        """Refresh pull-mode gauges from live snapshots, then render."""
+        self._m_up.set(1.0)
+        self._m_build.set(1.0, version=self._opts.version)
+        dec = self._decision.snapshot()
+        self._m_block_rate.set(float(dec["block_rate_pct"]) / 100.0)
+        self._m_over_budget.set(1.0 if dec["over_budget"] else 0.0)
+        cb = self.circuit_breaker.snapshot()
+        self._m_breaker.set(1.0 if cb["tripped"] else 0.0)
+        self._m_rl_tracked.set(float(self.rate_limiter.snapshot()["tracked_principals"]))
+        return self.metrics.render().encode()
+
     def _enforcing(self) -> bool:
         """Whether a block decision actually blocks in this mode.
 
@@ -224,6 +263,14 @@ class Gateway:
                 }
             },
         )
+        # _audit is called exactly once per proxied request on every terminal
+        # path (framing, auth, block, flag, allow), and NOT for the admin
+        # endpoints, so it is the correct single place to record request
+        # metrics. The histogram is in seconds, Prometheus convention.
+        self._m_requests.inc(decision=str(decision))
+        self._m_duration.observe(time.perf_counter() - started)
+        if enforced and decision is Decision.BLOCK:
+            self._m_stage_blocks.inc(stage=str(stage))
 
     # -- ASGI ------------------------------------------------------------
 
@@ -274,6 +321,11 @@ class Gateway:
                 }
             ).encode()
             await _respond(send, 200, body, request_id, "application/json")
+            return
+
+        if path == "/metrics":
+            await _respond(send, 200, self._render_metrics(), request_id,
+                           "text/plain; version=0.0.4; charset=utf-8")
             return
 
         # ---- S0 admission: rate limit ------------------------------------
