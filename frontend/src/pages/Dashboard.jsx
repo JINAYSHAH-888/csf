@@ -131,6 +131,10 @@ export default function Dashboard({ status, events, series, go, alerts = [], ack
             <li><span>Rate limiter</span><b>{status?.rate_limit.limited ?? 0} limited</b></li>
             <li><span>Malformed HTTP</span><b>{s?.framing_rejected ?? 0} rejected</b></li>
             <li><span>Enforcement blockers</span><b>{status?.enforcement_blockers.length || 'None'}</b></li>
+            <li><span>Prometheus metrics</span>
+              {status?.metrics?.enabled
+                ? <Badge tone="good" dot>{status.metrics.series} series</Badge>
+                : <Badge tone="neutral">Unavailable</Badge>}</li>
           </ul>
         </Card>
       </div>

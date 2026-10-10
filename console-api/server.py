@@ -313,6 +313,27 @@ def make_certificate() -> None:
         serialization.NoEncryption()))
 
 
+_METRICS_INFO: dict[str, Any] = {"enabled": False}
+_METRICS_PROBED = 0.0
+
+
+async def probe_metrics() -> dict[str, Any]:
+    """Check the gateway's Prometheus endpoint (present in backend >= ADR-0018)."""
+    global _METRICS_INFO, _METRICS_PROBED
+    if time.time() - _METRICS_PROBED < 30:
+        return _METRICS_INFO
+    try:
+        async with httpx.AsyncClient(timeout=3, verify=False) as c:
+            r = await c.get(GATEWAY + "/metrics")
+        lines = [ln for ln in r.text.splitlines() if ln and not ln.startswith("#")]
+        _METRICS_INFO = {"enabled": r.status_code == 200 and bool(lines), "series": len(lines),
+                         "path": "/metrics"}
+    except httpx.HTTPError:
+        _METRICS_INFO = {"enabled": False}
+    _METRICS_PROBED = time.time()
+    return _METRICS_INFO
+
+
 async def probe_tls() -> dict[str, Any]:
     """Open a real TLS connection to the gateway and report what it negotiated."""
     global _TLS_INFO, _TLS_PROBED
@@ -484,6 +505,7 @@ async def api_status(_: Request) -> JSONResponse:
     gw = _gw()
     return JSONResponse({
         "tls": await probe_tls(),
+        "metrics": await probe_metrics(),
         "algorithms": ["RS256", "ES256"],
         "mode": str(gw._opts.mode),
         "uptime_s": int(time.time() - S.started),

@@ -6,10 +6,10 @@
 # could be a deployable unit; until it builds reproducibly it is not one.
 
 # --- build -----------------------------------------------------------------
-# NOT digest-pinned, and that is a known gap (ADR-0010). A floating tag means
-# a later build is a different build, so no benchmark taken from this image
-# should be called reproducible until the base is pinned by digest.
-FROM golang:1.27-alpine AS build
+# Pinned by digest for reproducibility (ADR-0010/0018): a floating tag would
+# make a later build a different build. The tag is kept for readability; the
+# digest is what Docker resolves. Re-pin on an intentional base bump.
+FROM golang:1.27-alpine@sha256:738d1cf061836894ff6bb8c33881080ac66de8cf0586615012a0c8f592649cfa AS build
 
 WORKDIR /src
 
@@ -34,7 +34,7 @@ RUN mkdir -p /out/run-csf
 # Distroless static: no shell, no package manager, nothing to pivot to. The
 # sidecar parses attacker-controlled bytes for a living (threat model T4), so
 # the blast radius of a parser bug is worth minimising.
-FROM gcr.io/distroless/static-debian12:nonroot
+FROM gcr.io/distroless/static-debian12:nonroot@sha256:afa5c872c891853ca7fcf1f12c3edb23f7eeef36189728842dd51042ff57f7ab
 
 # Built from the REPO ROOT, not s1-sidecar/, so this can read vendor/crs --
 # the same pinned checkout the host benchmarks use. Staging a copy into the

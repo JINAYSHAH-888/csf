@@ -497,3 +497,55 @@ async def test_breaker_degrades_by_skipping_the_model_stage(upstream):
     assert gw.circuit_breaker.tripped()
     assert model.calls == calls_before, "a tripped breaker must stop calling the model"
     assert gw._readiness_problems(), "a tripped breaker must show in readiness"
+
+
+# -- Prometheus /metrics (production observability) ------------------------
+
+
+async def test_metrics_endpoint_exposes_prometheus(upstream):
+    gw = make_gateway(upstream, mode=Mode.ENFORCE,
+                      detectors=(FixedDetector(Stage.RULES,
+                                 Verdict(Decision.BLOCK, Stage.RULES, "crs", 12.0)),))
+    async with client_for(gw) as c:
+        await c.get("/?q=attack")        # one blocked request
+        await c.get("/healthz")          # admin endpoint: must NOT be counted
+        r = await c.get("/metrics")
+    assert r.status_code == 200
+    assert "text/plain" in r.headers["content-type"]
+    body = r.text
+    assert "# TYPE csf_request_duration_seconds histogram" in body
+    assert 'csf_requests_total{decision="block"} 1' in body
+    assert "csf_up 1" in body
+    # The admin endpoints (healthz/metrics) do not go through _audit, so they
+    # must not inflate the request metrics: no "allow" was recorded.
+    allow_lines = [ln for ln in body.splitlines()
+                   if ln.startswith('csf_requests_total{decision="allow"}')]
+    assert all(ln.endswith(" 0") for ln in allow_lines)
+
+
+async def test_metrics_records_latency_and_stage_blocks(upstream):
+    gw = make_gateway(upstream, mode=Mode.ENFORCE,
+                      detectors=(FixedDetector(Stage.SEMANTIC,
+                                 Verdict(Decision.BLOCK, Stage.SEMANTIC, "sqli", 7.0)),))
+    async with client_for(gw) as c:
+        for _ in range(3):
+            await c.get("/?q=x")
+        r = await c.get("/metrics")
+    body = r.text
+    assert 'csf_stage_blocks_total{stage="s2_semantic"} 3' in body
+    assert "csf_request_duration_seconds_count 3" in body
+
+
+async def test_metrics_breaker_gauge_reflects_state(upstream):
+    from csf.resilience import CircuitBreakerConfig
+
+    model = FixedDetector(Stage.MODEL, Verdict(), raises=True)
+    gw = make_gateway(upstream, mode=Mode.ENFORCE, detectors=(model,),
+                      circuit_breaker=CircuitBreakerConfig(
+                          trip_threshold_pct=25, min_samples=10, window=500,
+                          cooldown_seconds=100))
+    async with client_for(gw) as c:
+        for _ in range(20):
+            await c.get("/?q=x")
+        r = await c.get("/metrics")
+    assert "csf_circuit_breaker_tripped 1" in r.text
