@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: csf-gateway
+  namespace: csf
+  labels: { app: csf-gateway }
+spec:
+  selector: { app: csf-gateway }
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+    # /metrics is on the same port; scrape path is /metrics (see annotations
+    # on the Deployment's pod template).
