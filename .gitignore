@@ -23,7 +23,12 @@ coverage.out
 .ruff_cache/
 htmlcov/
 *.egg-info/
-vendor/crs/
+# vendor/crs is intentionally COMMITTED (vendored OWASP CRS rules,
+# Apache-2.0) so the sidecar image builds in CI and on a fresh clone.
+vendor/crs/.git/
 data/raw/
 data/processed/
 model/artifacts/
+
+# compiled Go binary (built by `go build`)
+s1-sidecar/s1-sidecar

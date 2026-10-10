@@ -269,7 +269,7 @@
       "version": "1.4.0"
     },
     {
-      "bom-ref": "ast_serialize==0.11.2",
+      "bom-ref": "ast_serialize==0.12.1",
       "description": "Python bindings for mypy AST serialization",
       "externalReferences": [
         {
@@ -292,9 +292,9 @@
         }
       ],
       "name": "ast_serialize",
-      "purl": "pkg:pypi/ast-serialize@0.11.2",
+      "purl": "pkg:pypi/ast-serialize@0.12.1",
       "type": "library",
-      "version": "0.11.2"
+      "version": "0.12.1"
     },
     {
       "bom-ref": "attrs==26.1.0",
@@ -699,7 +699,7 @@
         {
           "comment": "PackageSource: Local",
           "type": "distribution",
-          "url": "file:///Users/jinayshah/Library/Application%20Support/Claude/scratch-workspaces/1c8cae4c-57da-42fe-82e5-18ead279ec1a/a624dd84-ce51-418e-8bdc-11ab4d6916a5/scratch-2026-10-01-ec4830/csf/backend"
+          "url": "file:///Users/jinayshah/Downloads/csf/backend"
         }
       ],
       "licenses": [
@@ -857,30 +857,7 @@
       "version": "0.7.1"
     },
     {
-      "bom-ref": "esprima==4.0.1",
-      "description": "ECMAScript parsing infrastructure for multipurpose analysis in Python",
-      "externalReferences": [
-        {
-          "comment": "from packaging metadata: Home-page",
-          "type": "website",
-          "url": "https://github.com/Kronuz/esprima-python"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "name": "License :: OSI Approved :: BSD License"
-          }
-        }
-      ],
-      "name": "esprima",
-      "purl": "pkg:pypi/esprima@4.0.1",
-      "type": "library",
-      "version": "4.0.1"
-    },
-    {
-      "bom-ref": "filelock==4.0.12",
+      "bom-ref": "filelock==4.1.0",
       "description": "A platform independent file lock.",
       "externalReferences": [
         {
@@ -913,42 +890,9 @@
         }
       ],
       "name": "filelock",
-      "purl": "pkg:pypi/filelock@4.0.12",
+      "purl": "pkg:pypi/filelock@4.1.0",
       "type": "library",
-      "version": "4.0.12"
-    },
-    {
-      "bom-ref": "flatbuffers==25.12.19",
-      "description": "The FlatBuffers serialization format for Python",
-      "externalReferences": [
-        {
-          "comment": "from packaging metadata Project-URL: Documentation",
-          "type": "documentation",
-          "url": "https://google.github.io/flatbuffers/"
-        },
-        {
-          "comment": "from packaging metadata Project-URL: Source",
-          "type": "other",
-          "url": "https://github.com/google/flatbuffers"
-        },
-        {
-          "comment": "from packaging metadata: Home-page",
-          "type": "website",
-          "url": "https://google.github.io/flatbuffers/"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "name": "License :: OSI Approved :: Apache Software License"
-          }
-        }
-      ],
-      "name": "flatbuffers",
-      "purl": "pkg:pypi/flatbuffers@25.12.19",
-      "type": "library",
-      "version": "25.12.19"
+      "version": "4.1.0"
     },
     {
       "bom-ref": "fqdn==1.6.0",
@@ -1045,7 +989,7 @@
       "version": "1.0.9"
     },
     {
-      "bom-ref": "httptools==0.8.0",
+      "bom-ref": "httptools==0.9.0",
       "description": "A collection of framework independent HTTP protocol utils.",
       "externalReferences": [
         {
@@ -1063,9 +1007,9 @@
         }
       ],
       "name": "httptools",
-      "purl": "pkg:pypi/httptools@0.8.0",
+      "purl": "pkg:pypi/httptools@0.9.0",
       "type": "library",
-      "version": "0.8.0"
+      "version": "0.9.0"
     },
     {
       "bom-ref": "httpx==0.28.1",
@@ -1112,7 +1056,7 @@
       "version": "0.28.1"
     },
     {
-      "bom-ref": "hypothesis==6.168.3",
+      "bom-ref": "hypothesis==6.168.5",
       "description": "The property-based testing library for Python",
       "externalReferences": [
         {
@@ -1150,9 +1094,9 @@
         }
       ],
       "name": "hypothesis",
-      "purl": "pkg:pypi/hypothesis@6.168.3",
+      "purl": "pkg:pypi/hypothesis@6.168.5",
       "type": "library",
-      "version": "6.168.3"
+      "version": "6.168.5"
     },
     {
       "bom-ref": "idna==3.20",
@@ -1188,7 +1132,7 @@
       "version": "3.20"
     },
     {
-      "bom-ref": "iniconfig==2.3.0",
+      "bom-ref": "iniconfig==2.3.1",
       "description": "brain-dead simple config-ini parsing",
       "externalReferences": [
         {
@@ -1206,9 +1150,9 @@
         }
       ],
       "name": "iniconfig",
-      "purl": "pkg:pypi/iniconfig@2.3.0",
+      "purl": "pkg:pypi/iniconfig@2.3.1",
       "type": "library",
-      "version": "2.3.0"
+      "version": "2.3.1"
     },
     {
       "bom-ref": "isoduration==20.11.0",
@@ -1570,34 +1514,6 @@
       "version": "0.1.2"
     },
     {
-      "bom-ref": "ml_dtypes==0.6.0",
-      "description": "ml_dtypes is a stand-alone implementation of several NumPy dtype extensions used in machine learning.",
-      "externalReferences": [
-        {
-          "comment": "from packaging metadata Project-URL: repository",
-          "type": "vcs",
-          "url": "https://github.com/jax-ml/ml_dtypes"
-        },
-        {
-          "comment": "from packaging metadata Project-URL: homepage",
-          "type": "website",
-          "url": "https://github.com/jax-ml/ml_dtypes"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "id": "Apache-2.0"
-          }
-        }
-      ],
-      "name": "ml_dtypes",
-      "purl": "pkg:pypi/ml-dtypes@0.6.0",
-      "type": "library",
-      "version": "0.6.0"
-    },
-    {
       "bom-ref": "msgpack==1.2.3",
       "description": "MessagePack serializer",
       "externalReferences": [
@@ -1641,7 +1557,7 @@
       "version": "1.2.3"
     },
     {
-      "bom-ref": "mypy==2.3.1",
+      "bom-ref": "mypy==2.4.0",
       "description": "Optional static typing for Python",
       "externalReferences": [
         {
@@ -1679,9 +1595,9 @@
         }
       ],
       "name": "mypy",
-      "purl": "pkg:pypi/mypy@2.3.1",
+      "purl": "pkg:pypi/mypy@2.4.0",
       "type": "library",
-      "version": "2.3.1"
+      "version": "2.4.0"
     },
     {
       "bom-ref": "mypy_extensions==1.1.0",
@@ -1707,7 +1623,7 @@
       "version": "1.1.0"
     },
     {
-      "bom-ref": "narwhals==2.26.0",
+      "bom-ref": "narwhals==2.27.1",
       "description": "Extremely lightweight compatibility layer between dataframe libraries",
       "externalReferences": [
         {
@@ -1740,9 +1656,9 @@
         }
       ],
       "name": "narwhals",
-      "purl": "pkg:pypi/narwhals@2.26.0",
+      "purl": "pkg:pypi/narwhals@2.27.1",
       "type": "library",
-      "version": "2.26.0"
+      "version": "2.27.1"
     },
     {
       "bom-ref": "numpy==2.5.3",
@@ -1789,62 +1705,6 @@
       "purl": "pkg:pypi/numpy@2.5.3",
       "type": "library",
       "version": "2.5.3"
-    },
-    {
-      "bom-ref": "onnx==1.23.1",
-      "description": "Open Neural Network Exchange",
-      "externalReferences": [
-        {
-          "comment": "from packaging metadata Project-URL: Repository",
-          "type": "vcs",
-          "url": "https://github.com/onnx/onnx"
-        },
-        {
-          "comment": "from packaging metadata Project-URL: Homepage",
-          "type": "website",
-          "url": "https://onnx.ai/"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "id": "Apache-2.0"
-          }
-        }
-      ],
-      "name": "onnx",
-      "purl": "pkg:pypi/onnx@1.23.1",
-      "type": "library",
-      "version": "1.23.1"
-    },
-    {
-      "bom-ref": "onnxruntime==1.30.0",
-      "description": "ONNX Runtime is a runtime accelerator for Machine Learning models",
-      "externalReferences": [
-        {
-          "comment": "from packaging metadata: Download-URL",
-          "type": "distribution",
-          "url": "https://github.com/microsoft/onnxruntime/tags"
-        },
-        {
-          "comment": "from packaging metadata: Home-page",
-          "type": "website",
-          "url": "https://onnxruntime.ai"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "id": "MIT"
-          }
-        }
-      ],
-      "name": "onnxruntime",
-      "purl": "pkg:pypi/onnxruntime@1.30.0",
-      "type": "library",
-      "version": "1.30.0"
     },
     {
       "bom-ref": "packageurl-python==0.17.6",
@@ -2120,20 +1980,6 @@
       "version": "1.6.0"
     },
     {
-      "bom-ref": "protobuf==7.36.2",
-      "externalReferences": [
-        {
-          "comment": "from packaging metadata: Home-page",
-          "type": "website",
-          "url": "https://developers.google.com/protocol-buffers/"
-        }
-      ],
-      "name": "protobuf",
-      "purl": "pkg:pypi/protobuf@7.36.2",
-      "type": "library",
-      "version": "7.36.2"
-    },
-    {
       "bom-ref": "py-serializable==2.1.0",
       "description": "Library for serializing and deserializing Python Objects to and from JSON and XML.",
       "externalReferences": [
@@ -2178,7 +2024,7 @@
       "version": "2.1.0"
     },
     {
-      "bom-ref": "pycparser==3.0",
+      "bom-ref": "pycparser==3.11",
       "description": "C parser in Python",
       "externalReferences": [
         {
@@ -2196,18 +2042,18 @@
         }
       ],
       "name": "pycparser",
-      "purl": "pkg:pypi/pycparser@3.0",
+      "purl": "pkg:pypi/pycparser@3.11",
       "type": "library",
-      "version": "3.0"
+      "version": "3.11"
     },
     {
-      "bom-ref": "pydantic==2.13.5",
+      "bom-ref": "pydantic==2.14.0",
       "description": "Data validation using Python type hints",
       "externalReferences": [
         {
           "comment": "from packaging metadata Project-URL: Documentation",
           "type": "documentation",
-          "url": "https://docs.pydantic.dev"
+          "url": "https://pydantic.dev/docs/validation/latest/get-started/"
         },
         {
           "comment": "from packaging metadata Project-URL: Source",
@@ -2222,7 +2068,7 @@
         {
           "comment": "from packaging metadata Project-URL: Changelog",
           "type": "release-notes",
-          "url": "https://docs.pydantic.dev/latest/changelog/"
+          "url": "https://pydantic.dev/docs/validation/latest/get-started/changelog/"
         },
         {
           "comment": "from packaging metadata Project-URL: Homepage",
@@ -2239,12 +2085,12 @@
         }
       ],
       "name": "pydantic",
-      "purl": "pkg:pypi/pydantic@2.13.5",
+      "purl": "pkg:pypi/pydantic@2.14.0",
       "type": "library",
-      "version": "2.13.5"
+      "version": "2.14.0"
     },
     {
-      "bom-ref": "pydantic_core==2.46.5",
+      "bom-ref": "pydantic_core==2.50.0",
       "description": "Core functionality for Pydantic validation and serialization",
       "externalReferences": [
         {
@@ -2277,9 +2123,9 @@
         }
       ],
       "name": "pydantic_core",
-      "purl": "pkg:pypi/pydantic-core@2.46.5",
+      "purl": "pkg:pypi/pydantic-core@2.50.0",
       "type": "library",
-      "version": "2.46.5"
+      "version": "2.50.0"
     },
     {
       "bom-ref": "pyparsing==3.3.3",
@@ -2758,7 +2604,7 @@
       "version": "2026.9.1"
     },
     {
-      "bom-ref": "ruff==0.16.9",
+      "bom-ref": "ruff==0.17.0",
       "description": "An extremely fast Python linter and code formatter, written in Rust.",
       "externalReferences": [
         {
@@ -2791,9 +2637,9 @@
         }
       ],
       "name": "ruff",
-      "purl": "pkg:pypi/ruff@0.16.9",
+      "purl": "pkg:pypi/ruff@0.17.0",
       "type": "library",
-      "version": "0.16.9"
+      "version": "0.17.0"
     },
     {
       "bom-ref": "scikit-learn==1.9.1",
@@ -2905,29 +2751,6 @@
       "version": "1.17.0"
     },
     {
-      "bom-ref": "skl2onnx==1.20.0",
-      "description": "Convert scikit-learn models to ONNX",
-      "externalReferences": [
-        {
-          "comment": "from packaging metadata Project-URL: Homepage",
-          "type": "website",
-          "url": "https://github.com/onnx/sklearn-onnx"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "name": "License :: OSI Approved :: Apache Software License"
-          }
-        }
-      ],
-      "name": "skl2onnx",
-      "purl": "pkg:pypi/skl2onnx@1.20.0",
-      "type": "library",
-      "version": "1.20.0"
-    },
-    {
       "bom-ref": "sortedcontainers==2.4.0",
       "description": "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set",
       "externalReferences": [
@@ -2951,7 +2774,7 @@
       "version": "2.4.0"
     },
     {
-      "bom-ref": "sqlglot==30.21.0",
+      "bom-ref": "sqlglot==30.22.0",
       "description": "An easily customizable SQL parser and transpiler",
       "externalReferences": [
         {
@@ -2984,52 +2807,9 @@
         }
       ],
       "name": "sqlglot",
-      "purl": "pkg:pypi/sqlglot@30.21.0",
+      "purl": "pkg:pypi/sqlglot@30.22.0",
       "type": "library",
-      "version": "30.21.0"
-    },
-    {
-      "bom-ref": "sqlparse==0.6.0",
-      "description": "A non-validating SQL parser.",
-      "externalReferences": [
-        {
-          "comment": "from packaging metadata Project-URL: Documentation",
-          "type": "documentation",
-          "url": "https://sqlparse.readthedocs.io/"
-        },
-        {
-          "comment": "from packaging metadata Project-URL: Tracker",
-          "type": "issue-tracker",
-          "url": "https://github.com/andialbrecht/sqlparse/issues"
-        },
-        {
-          "comment": "from packaging metadata Project-URL: Source",
-          "type": "other",
-          "url": "https://github.com/andialbrecht/sqlparse"
-        },
-        {
-          "comment": "from packaging metadata Project-URL: Release Notes",
-          "type": "other",
-          "url": "https://sqlparse.readthedocs.io/en/latest/changes.html"
-        },
-        {
-          "comment": "from packaging metadata Project-URL: Home",
-          "type": "website",
-          "url": "https://github.com/andialbrecht/sqlparse"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "name": "License :: OSI Approved :: BSD License"
-          }
-        }
-      ],
-      "name": "sqlparse",
-      "purl": "pkg:pypi/sqlparse@0.6.0",
-      "type": "library",
-      "version": "0.6.0"
+      "version": "30.22.0"
     },
     {
       "bom-ref": "starlette==1.7.0",
@@ -3499,7 +3279,7 @@
       "version": "25.10.0"
     },
     {
-      "bom-ref": "websockets==17.1",
+      "bom-ref": "websockets==17.2",
       "description": "An implementation of the WebSocket Protocol (RFC 6455 & 7692)",
       "externalReferences": [
         {
@@ -3537,21 +3317,21 @@
         }
       ],
       "name": "websockets",
-      "purl": "pkg:pypi/websockets@17.1",
+      "purl": "pkg:pypi/websockets@17.2",
       "type": "library",
-      "version": "17.1"
+      "version": "17.2"
     }
   ],
   "dependencies": [
     {
       "dependsOn": [
-        "filelock==4.0.12",
+        "filelock==4.1.0",
         "msgpack==1.2.3",
-        "mypy==2.3.1",
+        "mypy==2.4.0",
         "pytest-cov==7.1.0",
         "pytest==9.1.1",
         "requests==2.34.2",
-        "ruff==0.16.9"
+        "ruff==0.17.0"
       ],
       "ref": "CacheControl==0.14.4"
     },
@@ -3588,7 +3368,7 @@
       "ref": "arrow==1.4.0"
     },
     {
-      "ref": "ast_serialize==0.11.2"
+      "ref": "ast_serialize==0.12.1"
     },
     {
       "ref": "attrs==26.1.0"
@@ -3604,7 +3384,7 @@
     },
     {
       "dependsOn": [
-        "pycparser==3.0"
+        "pycparser==3.11"
       ],
       "ref": "cffi==2.1.1"
     },
@@ -3637,14 +3417,20 @@
       "dependsOn": [
         "PyJWT==2.15.1",
         "cryptography==50.0.2",
+        "cyclonedx-bom==7.5.0",
+        "httptools==0.9.0",
         "httpx==0.28.1",
-        "hypothesis==6.168.3",
-        "mypy==2.3.1",
-        "pydantic==2.13.5",
+        "hypothesis==6.168.5",
+        "mypy==2.4.0",
+        "numpy==2.5.3",
+        "pip_audit==2.10.1",
+        "pydantic==2.14.0",
         "pytest-asyncio==1.4.0",
         "pytest-cov==7.1.0",
         "pytest==9.1.1",
-        "ruff==0.16.9",
+        "ruff==0.17.0",
+        "scikit-learn==1.9.1",
+        "sqlglot==30.22.0",
         "starlette==1.7.0",
         "uvicorn==0.54.0"
       ],
@@ -3678,13 +3464,7 @@
       "ref": "defusedxml==0.7.1"
     },
     {
-      "ref": "esprima==4.0.1"
-    },
-    {
-      "ref": "filelock==4.0.12"
-    },
-    {
-      "ref": "flatbuffers==25.12.19"
+      "ref": "filelock==4.1.0"
     },
     {
       "ref": "fqdn==1.6.0"
@@ -3701,7 +3481,7 @@
       "ref": "httpcore==1.0.9"
     },
     {
-      "ref": "httptools==0.8.0"
+      "ref": "httptools==0.9.0"
     },
     {
       "dependsOn": [
@@ -3726,20 +3506,20 @@
         "sortedcontainers==2.4.0",
         "tzdata==2026.5"
       ],
-      "ref": "hypothesis==6.168.3"
+      "ref": "hypothesis==6.168.5"
     },
     {
       "dependsOn": [
         "coverage==7.16.2",
-        "hypothesis==6.168.3",
-        "mypy==2.3.1",
+        "hypothesis==6.168.5",
+        "mypy==2.4.0",
         "pytest==9.1.1",
-        "ruff==0.16.9"
+        "ruff==0.17.0"
       ],
       "ref": "idna==3.20"
     },
     {
-      "ref": "iniconfig==2.3.0"
+      "ref": "iniconfig==2.3.1"
     },
     {
       "dependsOn": [
@@ -3795,7 +3575,7 @@
       "dependsOn": [
         "boolean.py==5.0",
         "pytest==9.1.1",
-        "ruff==0.16.9"
+        "ruff==0.17.0"
       ],
       "ref": "license-expression==30.4.4"
     },
@@ -3817,18 +3597,11 @@
       "ref": "mdurl==0.1.2"
     },
     {
-      "dependsOn": [
-        "numpy==2.5.3",
-        "pytest==9.1.1"
-      ],
-      "ref": "ml_dtypes==0.6.0"
-    },
-    {
       "ref": "msgpack==1.2.3"
     },
     {
       "dependsOn": [
-        "ast_serialize==0.11.2",
+        "ast_serialize==0.12.1",
         "librt==0.16.0",
         "lxml==6.1.3",
         "mypy_extensions==1.1.0",
@@ -3837,43 +3610,23 @@
         "tomli==2.5.0",
         "typing_extensions==4.16.0"
       ],
-      "ref": "mypy==2.3.1"
+      "ref": "mypy==2.4.0"
     },
     {
       "ref": "mypy_extensions==1.1.0"
     },
     {
       "dependsOn": [
-        "packaging==26.3",
-        "sqlparse==0.6.0"
+        "packaging==26.3"
       ],
-      "ref": "narwhals==2.26.0"
+      "ref": "narwhals==2.27.1"
     },
     {
       "ref": "numpy==2.5.3"
     },
     {
       "dependsOn": [
-        "ml_dtypes==0.6.0",
-        "numpy==2.5.3",
-        "protobuf==7.36.2",
-        "typing_extensions==4.16.0"
-      ],
-      "ref": "onnx==1.23.1"
-    },
-    {
-      "dependsOn": [
-        "flatbuffers==25.12.19",
-        "ml_dtypes==0.6.0",
-        "numpy==2.5.3",
-        "packaging==26.3",
-        "protobuf==7.36.2"
-      ],
-      "ref": "onnxruntime==1.30.0"
-    },
-    {
-      "dependsOn": [
-        "mypy==2.3.1",
+        "mypy==2.4.0",
         "pytest==9.1.1"
       ],
       "ref": "packageurl-python==0.17.6"
@@ -3909,7 +3662,7 @@
         "CacheControl==0.14.4",
         "coverage==7.16.2",
         "cyclonedx-python-lib==11.12.0",
-        "mypy==2.3.1",
+        "mypy==2.4.0",
         "packaging==26.3",
         "pip-requirements-parser==32.0.1",
         "pip_api==0.0.35",
@@ -3917,7 +3670,7 @@
         "pytest==9.1.1",
         "requests==2.34.2",
         "rich==15.0.0",
-        "ruff==0.16.9",
+        "ruff==0.17.0",
         "tomli==2.5.0",
         "tomli_w==1.2.0"
       ],
@@ -3934,32 +3687,29 @@
       "ref": "pluggy==1.6.0"
     },
     {
-      "ref": "protobuf==7.36.2"
-    },
-    {
       "dependsOn": [
         "defusedxml==0.7.1"
       ],
       "ref": "py-serializable==2.1.0"
     },
     {
-      "ref": "pycparser==3.0"
+      "ref": "pycparser==3.11"
     },
     {
       "dependsOn": [
         "annotated-types==0.8.0",
-        "pydantic_core==2.46.5",
+        "pydantic_core==2.50.0",
         "typing-inspection==0.4.4",
         "typing_extensions==4.16.0",
         "tzdata==2026.5"
       ],
-      "ref": "pydantic==2.13.5"
+      "ref": "pydantic==2.14.0"
     },
     {
       "dependsOn": [
         "typing_extensions==4.16.0"
       ],
-      "ref": "pydantic_core==2.46.5"
+      "ref": "pydantic_core==2.50.0"
     },
     {
       "ref": "pyparsing==3.3.3"
@@ -3967,7 +3717,7 @@
     {
       "dependsOn": [
         "coverage==7.16.2",
-        "hypothesis==6.168.3",
+        "hypothesis==6.168.5",
         "pytest==9.1.1",
         "typing_extensions==4.16.0"
       ],
@@ -3985,8 +3735,8 @@
       "dependsOn": [
         "Pygments==2.21.0",
         "attrs==26.1.0",
-        "hypothesis==6.168.3",
-        "iniconfig==2.3.0",
+        "hypothesis==6.168.5",
+        "iniconfig==2.3.1",
         "packaging==26.3",
         "pluggy==1.6.0",
         "requests==2.34.2",
@@ -4051,12 +3801,12 @@
       "ref": "rpds-py==2026.9.1"
     },
     {
-      "ref": "ruff==0.16.9"
+      "ref": "ruff==0.17.0"
     },
     {
       "dependsOn": [
         "joblib==1.6.0",
-        "narwhals==2.26.0",
+        "narwhals==2.27.1",
         "numpy==2.5.3",
         "scipy==1.18.1",
         "threadpoolctl==3.7.0"
@@ -4066,12 +3816,12 @@
     {
       "dependsOn": [
         "click==8.5.0",
-        "hypothesis==6.168.3",
-        "mypy==2.3.1",
+        "hypothesis==6.168.5",
+        "mypy==2.4.0",
         "numpy==2.5.3",
         "pytest-cov==7.1.0",
         "pytest==9.1.1",
-        "ruff==0.16.9",
+        "ruff==0.17.0",
         "threadpoolctl==3.7.0",
         "typing_extensions==4.16.0"
       ],
@@ -4081,26 +3831,16 @@
       "ref": "six==1.17.0"
     },
     {
-      "dependsOn": [
-        "onnx==1.23.1",
-        "scikit-learn==1.9.1"
-      ],
-      "ref": "skl2onnx==1.20.0"
-    },
-    {
       "ref": "sortedcontainers==2.4.0"
     },
     {
       "dependsOn": [
-        "mypy==2.3.1",
+        "mypy==2.4.0",
         "python-dateutil==2.9.0.post0",
-        "ruff==0.16.9",
+        "ruff==0.17.0",
         "typing_extensions==4.16.0"
       ],
-      "ref": "sqlglot==30.21.0"
-    },
-    {
-      "ref": "sqlparse==0.6.0"
+      "ref": "sqlglot==30.22.0"
     },
     {
       "dependsOn": [
@@ -4134,7 +3874,7 @@
     },
     {
       "dependsOn": [
-        "mypy==2.3.1"
+        "mypy==2.4.0"
       ],
       "ref": "uri-template==1.3.0"
     },
@@ -4146,18 +3886,18 @@
         "PyYAML==6.0.3",
         "click==8.5.0",
         "h11==0.16.0",
-        "httptools==0.8.0",
+        "httptools==0.9.0",
         "python-dotenv==1.2.4",
         "typing_extensions==4.16.0",
         "uvloop==0.23.0",
         "watchfiles==1.3.0",
-        "websockets==17.1"
+        "websockets==17.2"
       ],
       "ref": "uvicorn==0.54.0"
     },
     {
       "dependsOn": [
-        "mypy==2.3.1",
+        "mypy==2.4.0",
         "packaging==26.3"
       ],
       "ref": "uvloop==0.23.0"
@@ -4172,7 +3912,7 @@
       "ref": "webcolors==25.10.0"
     },
     {
-      "ref": "websockets==17.1"
+      "ref": "websockets==17.2"
     }
   ],
   "metadata": {

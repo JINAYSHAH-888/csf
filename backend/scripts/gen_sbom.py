@@ -102,23 +102,57 @@ def pip_audit() -> tuple[str, list[str]]:
     return (f"{len(deps)} packages scanned, {len(findings)} vulnerable", findings)
 
 
+def called_osvs(govulncheck_json: str) -> set[str]:
+    """OSV ids of CALLED vulnerabilities in govulncheck -format json output.
+
+    Pure and testable. Two gotchas this encodes, both of which previously made
+    the audit silently report "clean":
+      * -format json emits a STREAM of pretty-printed objects, not JSONL, so a
+        line-by-line parse matches nothing. We stream-decode objects.
+      * A vulnerability is CALLED only when a finding's trace top-frame names a
+        function; findings for merely-imported-but-uncalled vulns have no
+        function there and must not count.
+    """
+    called: set[str] = set()
+    decoder = json.JSONDecoder()
+    text, idx = govulncheck_json, 0
+    while idx < len(text):
+        while idx < len(text) and text[idx] in " \t\r\n":
+            idx += 1
+        if idx >= len(text):
+            break
+        try:
+            obj, end = decoder.raw_decode(text, idx)
+        except json.JSONDecodeError:
+            break
+        idx = end
+        if isinstance(obj, dict) and "finding" in obj:
+            f = obj["finding"]
+            trace = f.get("trace") or [{}]
+            if trace[0].get("function"):
+                called.add(f.get("osv", "?"))
+    return called
+
+
 def govulncheck() -> tuple[str, list[str]]:
     tool = _tool("govulncheck")
     if not tool:
         return "UNVERIFIED (govulncheck not installed)", []
     r = _run([tool, "-format", "json", "./..."], cwd=str(ROOT / "s1-sidecar"))
-    # govulncheck streams JSONL; a 'finding' with a trace that reaches the
-    # module is a reachable vuln. Count distinct OSV ids in findings.
-    osv: set[str] = set()
-    for line in r.stdout.splitlines():
-        try:
-            obj = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if "finding" in obj:
-            osv.add(obj["finding"].get("osv", "?"))
-    status = "clean" if not osv else f"{len(osv)} reachable vulnerabilities"
-    return status, sorted(osv)
+    # -format json emits a STREAM of pretty-printed JSON objects, not JSONL, so
+    # a line-by-line parse silently finds nothing. The authoritative signal is
+    # the EXIT CODE: 0 = no called vulnerabilities, 3 = called vulnerabilities
+    # present. We trust that, and parse the object stream (with a streaming
+    # decoder) only to name the OSV ids.
+    # NOTE: with -format json govulncheck ALWAYS exits 0 (the non-zero exit is
+    # only for the text format), so the exit code is NOT a usable signal here.
+    # A vulnerability is CALLED when a finding's trace top-frame names a
+    # function; those are the ones that matter. Count distinct OSV ids among
+    # called findings.
+    called = called_osvs(r.stdout)
+    if not called:
+        return "clean", []
+    return f"{len(called)} reachable vulnerability/ies", sorted(called)
 
 
 def third_party_open_rows() -> list[str]:

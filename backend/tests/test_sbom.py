@@ -87,3 +87,25 @@ def test_key_runtime_deps_present_with_versions(name):
     match = [c for c in doc["components"] if c["name"].lower() == name.lower()]
     assert match, f"{name} missing from SBOM"
     assert match[0].get("version")
+
+
+# -- govulncheck parser (regression for the silent-clean bug) --------------
+
+def test_govulncheck_parser_counts_called_not_imported():
+    """The parser must count CALLED vulns (trace top-frame has a function) and
+    ignore merely-imported ones. A prior bug parsed -format json as JSONL and
+    always found nothing -> silent 'clean'. This locks the fix."""
+    stream = """{"config": {"protocol_version": "v1.0.0"}}
+{"finding": {"osv": "GO-2026-CALLED", "trace": [
+  {"module": "net/http", "package": "net/http", "function": "ReadRequest"}
+]}}
+{"finding": {"osv": "GO-2026-IMPORTED", "trace": [
+  {"module": "golang.org/x/net"}
+]}}
+"""
+    called = gen_sbom.called_osvs(stream)
+    assert called == {"GO-2026-CALLED"}
+
+
+def test_govulncheck_parser_clean_on_empty():
+    assert gen_sbom.called_osvs('{"config": {}}\n{"progress": {"message": "x"}}') == set()

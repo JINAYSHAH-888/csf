@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:19d8efc5-058c-4c3d-a09e-5fbb598244de",
+  "serialNumber": "urn:uuid:f230fcaa-7637-4d58-8345-8e7ca1722740",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-10-08T09:43:40+05:30",
+    "timestamp": "2026-10-10T16:14:07+05:30",
     "tools": [
       {
         "vendor": "CycloneDX",
@@ -46,11 +46,11 @@
       }
     ],
     "component": {
-      "bom-ref": "pkg:golang/github.com/csf-project/csf/s1-sidecar@v0.0.0-20261008041051-dcc295be3474?type=module",
+      "bom-ref": "pkg:golang/github.com/csf-project/csf/s1-sidecar@v0.0.0-20261010103315-7b541b1deafa?type=module",
       "type": "application",
       "name": "github.com/csf-project/csf/s1-sidecar",
-      "version": "v0.0.0-20261008041051-dcc295be3474",
-      "purl": "pkg:golang/github.com/csf-project/csf/s1-sidecar@v0.0.0-20261008041051-dcc295be3474?goarch=arm64\u0026goos=darwin\u0026type=module",
+      "version": "v0.0.0-20261010103315-7b541b1deafa",
+      "purl": "pkg:golang/github.com/csf-project/csf/s1-sidecar@v0.0.0-20261010103315-7b541b1deafa?goarch=arm64\u0026goos=darwin\u0026type=module",
       "externalReferences": [
         {
           "url": "https://github.com/csf-project/csf/s1-sidecar",
@@ -341,46 +341,46 @@
       ]
     },
     {
-      "bom-ref": "pkg:golang/golang.org/x/net@v0.58.0?type=module",
+      "bom-ref": "pkg:golang/golang.org/x/net@v0.61.0?type=module",
       "type": "library",
       "name": "golang.org/x/net",
-      "version": "v0.58.0",
+      "version": "v0.61.0",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "ca7586eeba988b871ca5312e3d9d901961e4b5510cf433028fdcb30c4d10ed3a"
+          "content": "451fba8ff053042ae080e2ee8316beeba47c16fa0de8c1e5cc395921b37d605c"
         }
       ],
-      "purl": "pkg:golang/golang.org/x/net@v0.58.0?goarch=arm64\u0026goos=darwin\u0026type=module"
+      "purl": "pkg:golang/golang.org/x/net@v0.61.0?goarch=arm64\u0026goos=darwin\u0026type=module"
     },
     {
-      "bom-ref": "pkg:golang/golang.org/x/sync@v0.22.0?type=module",
+      "bom-ref": "pkg:golang/golang.org/x/sync@v0.24.0?type=module",
       "type": "library",
       "name": "golang.org/x/sync",
-      "version": "v0.22.0",
+      "version": "v0.24.0",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "4998e96de2e6ac2938c614526453595b980551e09e1608de92f23ffa07d271e9"
+          "content": "8aa883ac6a03832baf00aae12d0b61504cd4fd1dfbf0defc8176c18f179dee80"
         }
       ],
-      "purl": "pkg:golang/golang.org/x/sync@v0.22.0?goarch=arm64\u0026goos=darwin\u0026type=module"
+      "purl": "pkg:golang/golang.org/x/sync@v0.24.0?goarch=arm64\u0026goos=darwin\u0026type=module"
     },
     {
-      "bom-ref": "pkg:golang/golang.org/x/text@v0.41.0?type=module",
+      "bom-ref": "pkg:golang/golang.org/x/text@v0.43.0?type=module",
       "type": "library",
       "name": "golang.org/x/text",
-      "version": "v0.41.0",
+      "version": "v0.43.0",
       "scope": "required",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "bf3fec780d259d7f3b3ad86ed9fff42f6e11720ad70fdfd81534ae1a38f7ac7f"
+          "content": "d508afae587002c9cc39caa039d97d9b2eecf4ec9997c3b9fd41944c9557a167"
         }
       ],
-      "purl": "pkg:golang/golang.org/x/text@v0.41.0?goarch=arm64\u0026goos=darwin\u0026type=module"
+      "purl": "pkg:golang/golang.org/x/text@v0.43.0?goarch=arm64\u0026goos=darwin\u0026type=module"
     },
     {
       "bom-ref": "pkg:golang/google.golang.org/protobuf@v1.36.11?type=module",
@@ -413,7 +413,7 @@
   ],
   "dependencies": [
     {
-      "ref": "pkg:golang/github.com/csf-project/csf/s1-sidecar@v0.0.0-20261008041051-dcc295be3474?type=module",
+      "ref": "pkg:golang/github.com/csf-project/csf/s1-sidecar@v0.0.0-20261010103315-7b541b1deafa?type=module",
       "dependsOn": [
         "pkg:golang/github.com/corazawaf/coraza/v3@v3.8.0?type=module"
       ]
@@ -434,9 +434,9 @@
         "pkg:golang/github.com/tidwall/match@v1.1.1?type=module",
         "pkg:golang/github.com/tidwall/pretty@v1.2.1?type=module",
         "pkg:golang/github.com/valllabh/ocsf-schema-golang@v1.0.3?type=module",
-        "pkg:golang/golang.org/x/net@v0.58.0?type=module",
-        "pkg:golang/golang.org/x/sync@v0.22.0?type=module",
-        "pkg:golang/golang.org/x/text@v0.41.0?type=module",
+        "pkg:golang/golang.org/x/net@v0.61.0?type=module",
+        "pkg:golang/golang.org/x/sync@v0.24.0?type=module",
+        "pkg:golang/golang.org/x/text@v0.43.0?type=module",
         "pkg:golang/google.golang.org/protobuf@v1.36.11?type=module",
         "pkg:golang/rsc.io/binaryregexp@v0.2.0?type=module"
       ]
@@ -465,7 +465,7 @@
         "pkg:golang/github.com/goccy/go-json@v0.10.5?type=module",
         "pkg:golang/github.com/gotnospirit/makeplural@v0.0.0-20180622080156-a5f48d94d976?type=module",
         "pkg:golang/github.com/gotnospirit/messageformat@v0.0.0-20221001023931-dfe49f1eb092?type=module",
-        "pkg:golang/golang.org/x/text@v0.41.0?type=module"
+        "pkg:golang/golang.org/x/text@v0.43.0?type=module"
       ]
     },
     {
@@ -476,7 +476,7 @@
         "pkg:golang/github.com/gotnospirit/makeplural@v0.0.0-20180622080156-a5f48d94d976?type=module",
         "pkg:golang/github.com/gotnospirit/messageformat@v0.0.0-20221001023931-dfe49f1eb092?type=module",
         "pkg:golang/github.com/kaptinlin/go-i18n@v0.1.4?type=module",
-        "pkg:golang/golang.org/x/text@v0.41.0?type=module"
+        "pkg:golang/golang.org/x/text@v0.43.0?type=module"
       ]
     },
     {
@@ -505,18 +505,18 @@
       ]
     },
     {
-      "ref": "pkg:golang/golang.org/x/net@v0.58.0?type=module",
+      "ref": "pkg:golang/golang.org/x/net@v0.61.0?type=module",
       "dependsOn": [
-        "pkg:golang/golang.org/x/text@v0.41.0?type=module"
+        "pkg:golang/golang.org/x/text@v0.43.0?type=module"
       ]
     },
     {
-      "ref": "pkg:golang/golang.org/x/sync@v0.22.0?type=module"
+      "ref": "pkg:golang/golang.org/x/sync@v0.24.0?type=module"
     },
     {
-      "ref": "pkg:golang/golang.org/x/text@v0.41.0?type=module",
+      "ref": "pkg:golang/golang.org/x/text@v0.43.0?type=module",
       "dependsOn": [
-        "pkg:golang/golang.org/x/sync@v0.22.0?type=module"
+        "pkg:golang/golang.org/x/sync@v0.24.0?type=module"
       ]
     },
     {
