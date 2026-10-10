@@ -35,7 +35,7 @@ on.
 | S0 auth | RFC 8725 JWT verification; JWKS rotation, fail-closed | ✅ full attack suite blocked |
 | S1 rules | OWASP Coraza + CRS in a Go sidecar over a unix socket | ✅ scores on attack rules only (cross-corpus, ADR-0015) |
 | S2 semantic | grammar-aware SQLi/XSS/shell/traversal analysis | ✅ parser-based, adversarially tested (ADR-0012) |
-| S3 learned | char-n-gram classifier | ⚠ **off by default — negative result** (cross-corpus collapse, Phase 6); advisory-only if enabled (ADR-0017) |
+| S3 learned | char-n-gram classifier | ⚠ **trained, wired, OFF by default — does not generalise** (frozen-holdout AUC 0.66; learns benign value patterns, not attack structure). Advisory-only if enabled; per-deployment training is the only defensible use (ADR-0008) |
 | S4 decision | disjunctive fusion, deferral, block-rate budget | ✅ ADR-0011 |
 | S0 admission | per-principal rate limit, circuit breaker, cap-as-signal | ✅ ADR-0013 |
 | Config integrity | fingerprint + Ed25519/HMAC signature, safe-fail | ✅ ADR-0014/0017 |

@@ -88,6 +88,10 @@ class S3LearnedDetector:
         self._cfg = config
         self._log = logger
         self._model: Any = None
+        # The feature contract the model was trained with. Read from the
+        # artifact bundle so serving cannot drift from training (ADR-0006 /
+        # ADR-0008): a values-only model MUST be served values-only docs.
+        self._provenance: bool = True
         self._load_error = ""
         self.evaluations = 0
         self.unavailable_count = 0
@@ -117,7 +121,15 @@ class S3LearnedDetector:
             # attacker can write is already a full compromise, so pickle adds
             # no new exposure here — but the path must stay operator-owned.
             with path.open("rb") as handle:
-                self._model = pickle.load(handle)  # noqa: S301
+                loaded = pickle.load(handle)  # noqa: S301
+            # Format 2 is a bundle {model, provenance}; a bare estimator is the
+            # legacy format and is assumed provenance-tagged.
+            if isinstance(loaded, dict) and "model" in loaded:
+                self._model = loaded["model"]
+                self._provenance = bool(loaded.get("provenance", True))
+            else:
+                self._model = loaded
+                self._provenance = True
         except Exception as exc:  # noqa: BLE001
             self._load_error = f"{type(exc).__name__}: {exc}"
             if self._log is not None:
@@ -138,7 +150,7 @@ class S3LearnedDetector:
         if self._model is None:
             return S3Signal(available=False, error=self._load_error or "no model")
 
-        document = request_document(extracted)
+        document = request_document(extracted, provenance=self._provenance)
         try:
             probability = float(self._model.predict_proba([document])[0][1])
         except Exception as exc:  # noqa: BLE001

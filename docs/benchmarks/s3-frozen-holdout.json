@@ -1,0 +1,22 @@
+{
+  "note": "Definitive S3 evaluation. The learned stage was trained (values-only, calibrated, train-only) and measured on the FROZEN HOLDOUT, which had been used for nothing else. AUC is threshold-free (benign vs claimed classes). This supersedes the val-based and ECML-only numbers.",
+  "measured_at": "2026-10-10",
+  "model": "char_wb 2-5gram TF-IDF + calibrated LogisticRegression, values-only (no provenance tags)",
+  "auc": {
+    "val_csic_derived": 0.9993,
+    "test_frozen_holdout": 0.6581,
+    "ecml_cross_corpus": 0.7185
+  },
+  "fpr_at_val_0.1pct_threshold": {
+    "val": 0.2,
+    "test_frozen_holdout": 98.3
+  },
+  "split_integrity": {
+    "attack_form_overlap_train_test_pct": 0,
+    "attack_group_overlap_train_test": 0,
+    "benign_path_overlap_train_test_pct": 100,
+    "leakage": "none (clean group split)"
+  },
+  "root_cause": "S3 keys on the character n-grams of benign parameter VALUES. On the frozen holdout, whose benign values are novel, it defaults to its ~0.888 prior and over-fires. The val 0.9993 was optimistic because val's benign values resembled train's. It learns benign value patterns, not transferable attack structure.",
+  "verdict": "Does not generalise. OFF by default; advisory-only if enabled (never blocks). The cascade's detection is S1+S2 (94.3% claimed recall at 0.00% FPR on this same holdout), which does not need S3. A per-deployment model trained and calibrated on the operator's own traffic (scripts/train_s3.py + scripts/calibrate.py) is the only defensible way to enable it."
+}

@@ -43,7 +43,10 @@ def load(split: str) -> list[Request]:
             for line in (DATA / f"{split}.jsonl").read_text().splitlines() if line]
 
 
-PROVENANCE = os.environ.get("S3_PROVENANCE", "1") == "1"
+# Values-only by DEFAULT: provenance tags are a corpus fingerprint that wrecks
+# cross-application transfer (Phase 6 / ADR-0008). The shipped model is
+# values-only; provenance is opt-in for experiments via S3_PROVENANCE=1.
+PROVENANCE = os.environ.get("S3_PROVENANCE", "0") == "1"
 
 
 def to_doc(r: Request) -> str:
@@ -147,9 +150,13 @@ def main() -> int:
 
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
     import pickle
-    suffix = "" if PROVENANCE else "_novenance"
+    # The artifact bundles the feature contract with the model, so the gateway
+    # serves the exact representation the model was trained on (no train/serve
+    # skew). The shipped, values-only model is s3_model.pkl.
+    suffix = "_provenance" if PROVENANCE else ""
+    bundle = {"format": 2, "model": calibrated, "provenance": PROVENANCE}
     with (ARTIFACTS / f"s3_model{suffix}.pkl").open("wb") as fh:
-        pickle.dump(calibrated, fh)
+        pickle.dump(bundle, fh)
     (ARTIFACTS / f"s3_metadata{suffix}.json").write_text(json.dumps({
         "trained_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "provenance_features": PROVENANCE,

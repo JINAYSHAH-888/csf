@@ -206,3 +206,65 @@ async def test_opting_out_of_advisory_allows_block():
     detector._model = FixedModel(1.0)
     verdict = await detector.evaluate(sample())
     assert verdict.decision is Decision.BLOCK
+
+
+# -- artifact bundle format + train/serve provenance consistency (ADR-0008) --
+
+
+# Module-level so they pickle (local classes cannot be pickled).
+class _NovenanceEcho:
+    """P(attack)=1 only if the doc has NO provenance tags, so a test can tell
+    which representation the detector fed the model."""
+    def predict_proba(self, docs):
+        out = []
+        for d in docs:
+            novenance = "[ENDPOINT]" not in d and "[PARAM]" not in d
+            out.append([0.0, 1.0] if novenance else [1.0, 0.0])
+        return out
+
+
+class _ConstModel:
+    def predict_proba(self, docs):
+        return [[0.2, 0.8] for _ in docs]
+
+
+async def test_bundle_format_sets_provenance_from_artifact(tmp_path):
+    """A format-2 bundle carries the feature contract; the detector must serve
+    with the SAME provenance the model was trained on, or it is train/serve
+    skew -- the failure ADR-0006 exists to prevent."""
+    import pickle
+
+    path = tmp_path / "m.pkl"
+    with path.open("wb") as fh:
+        pickle.dump({"format": 2, "model": _NovenanceEcho(), "provenance": False}, fh)
+    det = S3LearnedDetector(S3Config(model_path=path, advisory_only=False))
+    assert det._provenance is False
+    # The detector must build a values-only doc (no provenance tags) -> Echo 1.0.
+    assert det.predict(sample()).probability == 1.0
+
+
+async def test_bare_estimator_is_treated_as_provenance(tmp_path):
+    """Backward compatibility: a legacy pickle of a bare estimator loads and is
+    assumed provenance-tagged."""
+    import pickle
+
+    path = tmp_path / "legacy.pkl"
+    with path.open("wb") as fh:
+        pickle.dump(_ConstModel(), fh)
+    det = S3LearnedDetector(S3Config(model_path=path))
+    assert det._provenance is True
+    assert det.healthy
+
+
+def test_shipped_artifact_loads_and_is_values_only():
+    """The shipped artifact, if present, must be a values-only bundle (the
+    cross-corpus-robust representation). Skipped if the model isn't built."""
+    from pathlib import Path
+
+    art = Path(__file__).resolve().parent.parent.parent / "model/artifacts/s3_model.pkl"
+    if not art.exists():
+        import pytest
+        pytest.skip("s3_model.pkl not built (run scripts/train_s3.py)")
+    det = S3LearnedDetector(S3Config(model_path=art))
+    assert det.healthy
+    assert det._provenance is False, "shipped model must be values-only (ADR-0008)"

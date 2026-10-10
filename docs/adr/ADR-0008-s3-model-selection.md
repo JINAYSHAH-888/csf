@@ -77,3 +77,40 @@ measurable outcome and a reportable negative result, not a guess.
 - `ai-sqli-waf` 3-model comparison (char-CNN vs DistilBERT)
 - Static quantization with HF Optimum; inference-lab benchmarks
 - ADR-0005 (benchmark quantisation per platform, never assume)
+
+
+## Final verdict (post-training, measured on the frozen holdout)
+
+S3 was fully trained (values-only, calibrated, train-only) and the model was
+then measured on the **frozen holdout** — the split used for nothing else all
+project. The result is definitive and worse than the earlier val/ECML numbers
+suggested:
+
+| set | AUC (benign vs claimed) |
+|---|---|
+| val (CSIC-derived) | 0.9993 |
+| **frozen holdout (CSIC-derived)** | **0.6581** |
+| ECML (cross-corpus) | 0.7185 |
+
+At the val-derived 0.1%-FPR threshold, the holdout FPR is **98.3%**. The split
+is clean (0% attack-form and 0% group overlap train↔test; benign paths 100%
+seen), so this is not leakage. Root cause: **S3 keys on the character n-grams
+of benign parameter values**, so on a holdout with novel benign values it
+defaults to its ~0.888 prior and over-fires. The val 0.9993 was optimistic
+because val's benign values happened to resemble train's. S3 learns benign
+value patterns, not transferable attack structure.
+
+**Decision, once and for all:** S3 is trained, bundled (the artifact carries
+its feature contract so serving cannot skew from training), and wired — but it
+**does not generalise and must not block.** It stays off by default and
+advisory-only if enabled (ADR-0017). The cascade's detection is S1+S2, which
+reaches 94.3% claimed recall at 0.00% FPR on this same holdout **without** S3.
+The only defensible way to enable S3 is per-deployment: train on the operator's
+own traffic and calibrate the threshold on their own shadow traffic
+(`scripts/train_s3.py` + `scripts/calibrate.py`), advisory. The shipped
+pretrained artifact is a reference, not a general detector.
+
+An honest negative result, backed now by the strongest evidence available. A
+meta-classifier over S1/S2's structural signals (rather than raw request text)
+is the plausible future direction, because those features transfer where raw
+character n-grams do not — not built here.
