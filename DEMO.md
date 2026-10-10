@@ -5,6 +5,8 @@ gateway to a deliberately vulnerable sample shop; the console shows every decisi
 
 ## Run
 
+Setting up on a fresh computer? Follow [SETUP.md](SETUP.md) for every prerequisite and step.
+
 Prerequisites: Docker Desktop, Node 20+, and `vendor/crs` (OWASP CRS v4.21.0, gitignored).
 
 ```
