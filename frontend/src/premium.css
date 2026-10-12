@@ -105,3 +105,21 @@ a.btn { text-decoration: none; color: inherit; }
 
 .muted { color: var(--muted); font-size: 12.5px; margin-top: 2px; font-weight: 400; }
 .table td .muted { display: block; line-height: 1.45; }
+
+/* rate limiter card */
+.rl { display: grid; grid-template-columns: 1.1fr 1.6fr .9fr; gap: 24px; align-items: center; }
+.rl-toggle { display: flex; gap: 14px; align-items: center; }
+.switch { width: 46px; height: 26px; border-radius: 13px; border: 1px solid var(--border-strong); background: var(--ov); position: relative; cursor: pointer; flex-shrink: 0; transition: background .2s; padding: 0; }
+.switch i { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--muted); transition: transform .2s, background .2s; }
+.switch.on { background: var(--good-bg); border-color: var(--good); }
+.switch.on i { transform: translateX(20px); background: var(--good); }
+.switch:disabled { opacity: .5; cursor: not-allowed; }
+.rl-fields { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.rl-fields label { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 150px; }
+.rl-fields label span { font-size: 12px; color: var(--muted); }
+.rl-fields input { width: 100%; }
+.rl-stats { display: flex; gap: 22px; justify-content: flex-end; }
+.rl-stats div { display: flex; flex-direction: column; align-items: flex-end; }
+.rl-stats b { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.rl-stats span { font-size: 11.5px; color: var(--muted); }
+@media (max-width: 1000px) { .rl { grid-template-columns: 1fr; } .rl-stats { justify-content: flex-start; } .rl-stats div { align-items: flex-start; } }

@@ -16,13 +16,13 @@ export default function Traffic({ status, events, series, reset }) {
 
   const text = (e) => `${e.method} ${e.path}${e.payload?.query ? '?' + e.payload.query : ''} ${category(e) || ''} ${e.stage}`.toLowerCase()
   const shown = events.filter((e) =>
-    (filter === 'all' || (filter === 'blocked' ? e.decision === 'block' : e.decision !== 'block')) &&
+    (filter === 'all' || (filter === 'blocked' ? (e.decision === 'block' || e.decision === 'rate_limit') : (e.decision !== 'block' && e.decision !== 'rate_limit'))) &&
     (!q || text(e).includes(q.toLowerCase())))
   const selected = events.find((e) => e.seq === sel)
   const counts = {
     all: events.length,
-    blocked: events.filter((e) => e.decision === 'block').length,
-    allowed: events.filter((e) => e.decision !== 'block').length,
+    blocked: events.filter((e) => e.decision === 'block' || e.decision === 'rate_limit').length,
+    allowed: events.filter((e) => e.decision !== 'block' && e.decision !== 'rate_limit').length,
   }
 
   return (

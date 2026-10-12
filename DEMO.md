@@ -27,7 +27,7 @@ API on http://localhost:8000. Without Docker, `console-api/server.py` runs nativ
 | Tokeniser and feature encoder | Normalisation, decoded candidates, model feature builder | Threat simulator: Inspected values |
 | Grammar-aware detection of obfuscated payloads | SQL / HTML / shell / path parsers (S2) | Threat simulator: S2 trace; Detection performance |
 | Learned classifier | Character n-gram model (S3), **off by default** | Pipeline shows it as optional |
-| Decision and policy engine | Disjunctive fusion, deferral, block-rate budget, rate limit, circuit breaker | Dashboard: Decision node, Gateway health |
+| Decision and policy engine | Disjunctive fusion, deferral, block-rate budget, rate limit, circuit breaker | Dashboard: Decision node, Gateway health, Rate limiting card (switch, rate, burst) |
 | Logging and alerting | JSON audit log, Live traffic log, alert rules, Prometheus `/metrics` | Live traffic, Dashboard: Alerts |
 | Retraining from logs | Labelled feedback dataset export (JSONL, model input format) | Live traffic: Export feedback dataset |
 

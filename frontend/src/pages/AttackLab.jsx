@@ -31,6 +31,7 @@ export default function AttackLab({ status, refreshStatus }) {
 
   const ev = res?.sent?.event
   const blocked = res && res.sent.status >= 400
+  const limited = res?.sent?.event?.decision === 'rate_limit'
   const shadow = ev?.decision === 'block' && !ev?.enforced
   const rows = res ? buildRows({ analysis: res.analysis, sent: res.sent, hasToken: false, status }) : null
 
@@ -93,7 +94,8 @@ export default function AttackLab({ status, refreshStatus }) {
                 <div className="verdict-icon"><Icon name={blocked ? 'x' : shadow ? 'alert' : 'check'} size={22} /></div>
                 <div>
                   <div className="verdict-title">
-                    {blocked ? 'Blocked by the gateway' : shadow ? 'Allowed through (shadow mode)' : 'Allowed'}
+                    {limited ? (ev.enforced ? 'Rate limited by the gateway' : 'Over the rate limit (shadow mode)')
+                      : blocked ? 'Blocked by the gateway' : shadow ? 'Allowed through (shadow mode)' : 'Allowed'}
                   </div>
                   <div className="verdict-sub">
                     {label}{ev && <> · decided in {(ev.latency_us / 1000).toFixed(1)} ms · HTTP {res.sent.status}</>}
@@ -102,6 +104,12 @@ export default function AttackLab({ status, refreshStatus }) {
                 </div>
               </div>
 
+              {limited && (
+                <div className="alert warn">
+                  This request exceeded the rate limit, so it was handled before any inspection stage ran.
+                  {ev.enforced ? ' The gateway answered HTTP 429.' : ' In Enforce mode it would be answered with HTTP 429.'}
+                </div>
+              )}
               <Card title="Inspection trace">
                 <Cascade rows={rows} />
               </Card>

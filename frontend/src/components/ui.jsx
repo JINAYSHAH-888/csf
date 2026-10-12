@@ -154,13 +154,14 @@ export function Donut({ parts, size = 150, center, centerSub }) {
 }
 
 export const decisionTone = (d, enforced = true) =>
-  d === 'block' ? (enforced ? 'bad' : 'warn') : d === 'allow_and_flag' ? 'warn' : 'good'
+  d === 'rate_limit' ? 'warn' : d === 'block' ? (enforced ? 'bad' : 'warn') : d === 'allow_and_flag' ? 'warn' : 'good'
 export const decisionLabel = (d, enforced = true) =>
-  d === 'block' ? (enforced ? 'Blocked' : 'Would block') : d === 'allow_and_flag' ? 'Flagged' : 'Allowed'
+  d === 'rate_limit' ? (enforced ? 'Rate limited' : 'Would limit') : d === 'block' ? (enforced ? 'Blocked' : 'Would block') : d === 'allow_and_flag' ? 'Flagged' : 'Allowed'
 
 // Classify an audit event into a threat category.
 export function category(e) {
   if (e.decision === 'allow') return null
+  if (e.decision === 'rate_limit') return 'Rate limited'
   if (e.stage === 's0_auth') return 'Token forgery'
   if (e.stage === 's0_framing') return 'Protocol abuse'
   const r = (e.reason || '').toLowerCase()

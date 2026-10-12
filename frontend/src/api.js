@@ -25,6 +25,8 @@ export const api = {
   setMode: (mode) => post('/api/mode', { mode }),
   reset: () => post('/api/reset'),
   alerts: () => call('/api/alerts'),
+  rateLimit: () => call('/api/ratelimit'),
+  setRateLimit: (cfg) => post('/api/ratelimit', cfg),
   ackAlert: (id) => post(`/api/alerts/${id}/ack`),
   exportSummary: () => call('/api/export/summary'),
 }

@@ -47,6 +47,7 @@ from csf.decision import DecisionEngine, StageEvidence
 from csf.extraction import extract
 from csf.main import build_app
 from csf.model.features import request_document
+from csf.resilience import RateLimitConfig, RateLimiter
 from csf.telemetry import Mode
 from csf.verdict import Decision
 
@@ -247,6 +248,9 @@ class _Capture(logging.Handler):
 class State:
     gateway: Any = None
     started = time.time()
+    # Live rate-limit settings. Off by default (as in the backend); the
+    # numbers are chosen so the demo traffic generator (~2 req/s) can trip it.
+    rl: dict[str, Any] = {"enabled": False, "rate_per_second": 1.0, "burst": 3.0}
 
 
 S = State()
@@ -375,6 +379,8 @@ ALERT_LOG = logging.getLogger("csf.alerts")
 def categorize(e: dict[str, Any]) -> str | None:
     if e.get("decision") == "allow":
         return None
+    if e.get("decision") == "rate_limit":
+        return "Rate limited"
     stage, reason = e.get("stage", ""), (e.get("reason") or "").lower()
     if stage == "s0_auth":
         return "Token forgery"
@@ -440,6 +446,11 @@ def evaluate_alerts() -> None:
         if n >= 4:
             raise_alert("cat:" + cat, "warning", f"Repeated {cat.lower()} attempts",
                         f"{n} blocked in the last 30 seconds.")
+    limited = [e for e in EVENTS if now - e["ts"] <= 30 and e["decision"] == "rate_limit"]
+    if len(limited) >= 5:
+        verb = "rejected with HTTP 429" if limited[-1].get("enforced") else "would be limited (not enforced)"
+        raise_alert("ratelimit", "warning", "Rate limit exceeded",
+                    f"{len(limited)} requests {verb} in the last 30 seconds.")
     if gw.decision_engine.snapshot().get("over_budget"):
         raise_alert("budget", "warning", "Block rate over budget",
                     "Observed block rate exceeds the configured ceiling; "
@@ -469,7 +480,8 @@ FEEDBACK = RUNTIME / "feedback.jsonl"
 
 def persist_feedback(ev: dict[str, Any]) -> None:
     p = ev.get("payload")
-    if not p:
+    # Rate-limited requests were never inspected, so they carry no label.
+    if not p or ev["decision"] == "rate_limit":
         return
     gw = _gw()
     headers = [(b"host", b"demo")]
@@ -514,6 +526,7 @@ async def api_status(_: Request) -> JSONResponse:
         "enforcement_blockers": gw.decision_engine.enforcement_blockers(),
         "circuit_breaker": gw.circuit_breaker.snapshot(),
         "rate_limit": gw.rate_limiter.snapshot(),
+        "rate_limit_config": dict(S.rl),
         "stages": [
             {"id": "s0_framing", "label": "S0 Framing", "enabled": True},
             {"id": "s0_auth", "label": "S0 JWT auth", "enabled": True},
@@ -549,6 +562,41 @@ async def api_mode(request: Request) -> JSONResponse:
 async def api_tokens(_: Request) -> JSONResponse:
     return JSONResponse({"issuer": ISSUER, "audience": AUDIENCE,
                          "tokens": make_tokens()})
+
+
+def _apply_rate_limit() -> None:
+    """Install a fresh limiter built from S.rl. The gateway looks the limiter
+    up on every request, so no backend change is needed."""
+    cfg = RateLimitConfig(enabled=bool(S.rl["enabled"]),
+                          rate_per_second=float(S.rl["rate_per_second"]),
+                          burst=float(S.rl["burst"]))
+    cfg.validate()
+    gw = _gw()
+    gw.rate_limiter = RateLimiter(cfg)
+    gw._opts.rate_limit = cfg
+
+
+async def api_ratelimit_get(_: Request) -> JSONResponse:
+    return JSONResponse({"config": S.rl, "stats": _gw().rate_limiter.snapshot()})
+
+
+async def api_ratelimit_set(request: Request) -> JSONResponse:
+    body = await request.json()
+    try:
+        new = {
+            "enabled": bool(body.get("enabled", S.rl["enabled"])),
+            "rate_per_second": float(body.get("rate_per_second", S.rl["rate_per_second"])),
+            "burst": float(body.get("burst", S.rl["burst"])),
+        }
+        if new["rate_per_second"] <= 0 or new["rate_per_second"] > 10_000:
+            raise ValueError("rate_per_second must be between 0 and 10000")
+        if new["burst"] < 1 or new["burst"] > 100_000:
+            raise ValueError("burst must be at least 1")
+    except (TypeError, ValueError) as exc:
+        return JSONResponse({"error": str(exc)}, status_code=400)
+    S.rl.update(new)
+    _apply_rate_limit()
+    return JSONResponse({"config": S.rl, "stats": _gw().rate_limiter.snapshot()})
 
 
 async def api_alerts(_: Request) -> JSONResponse:
@@ -593,6 +641,7 @@ async def api_reset(_: Request) -> JSONResponse:
     for k in vars(type(gw.stats)).get("__slots__", ()):
         setattr(gw.stats, k, 0)
     gw.decision_engine.__init__(gw._opts.decision)  # type: ignore[misc]
+    _apply_rate_limit()   # fresh counters, same settings
     return JSONResponse({"ok": True})
 
 
@@ -743,6 +792,8 @@ routes = [
     Route("/api/mode", api_mode, methods=["POST"]),
     Route("/api/tokens", api_tokens),
     Route("/api/reset", api_reset, methods=["POST"]),
+    Route("/api/ratelimit", api_ratelimit_get),
+    Route("/api/ratelimit", api_ratelimit_set, methods=["POST"]),
     Route("/api/alerts", api_alerts),
     Route("/api/alerts/{aid:int}/ack", api_alert_ack, methods=["POST"]),
     Route("/api/export/summary", api_export_summary),

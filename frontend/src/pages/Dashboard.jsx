@@ -1,4 +1,5 @@
 import Alerts from '../components/Alerts'
+import RateLimit from '../components/RateLimit'
 import { Icon, Card, Kpi, Badge, Donut, AnimatedNumber, category, decisionTone, decisionLabel } from '../components/ui'
 
 const PIPE = [
@@ -13,7 +14,7 @@ const PIPE = [
 const CAT_TONE = {
   'SQL injection': '#f87171', 'Cross-site scripting': '#fb923c', 'Command injection': '#fbbf24',
   'Path traversal': '#a78bfa', 'Token forgery': '#38bdf8', 'Protocol abuse': '#f472b6',
-  'Rule match (CRS)': '#34d399', Other: '#8493ad',
+  'Rule match (CRS)': '#34d399', 'Rate limited': '#e879f9', Other: '#8493ad',
 }
 
 function ago(ts) {
@@ -21,7 +22,7 @@ function ago(ts) {
   return s < 60 ? `${s}s ago` : `${Math.floor(s / 60)}m ago`
 }
 
-export default function Dashboard({ status, events, series, go, alerts = [], ackAlert }) {
+export default function Dashboard({ status, events, series, go, alerts = [], ackAlert, refreshStatus }) {
   const s = status?.stats
   const total = s?.total ?? 0
   const blocked = (s?.blocked ?? 0) + (s?.shadow_would_block ?? 0)
@@ -138,6 +139,8 @@ export default function Dashboard({ status, events, series, go, alerts = [], ack
           </ul>
         </Card>
       </div>
+
+      <RateLimit status={status} refreshStatus={refreshStatus} />
 
         <Card title="Latest detections" right={<button className="link-btn" onClick={() => go('traffic')}>View all <Icon name="arrow" size={14} /></button>}>
           {threats.length ? (
