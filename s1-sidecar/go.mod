@@ -1,8 +1,8 @@
 module github.com/csf-project/csf/s1-sidecar
 
-go 1.27.1
+go 1.27.3
 
-require github.com/corazawaf/coraza/v3 v3.8.0
+require github.com/corazawaf/coraza/v3 v3.8.1
 
 require (
 	github.com/corazawaf/libinjection-go v0.3.3 // indirect
