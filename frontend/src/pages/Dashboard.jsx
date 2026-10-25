@@ -7,13 +7,17 @@ const PIPE = [
   { id: 's0_auth', code: 'S0', name: 'Identity', sub: 'JWT verification' },
   { id: 's1_rules', code: 'S1', name: 'Signatures', sub: 'OWASP CRS' },
   { id: 's2_semantic', code: 'S2', name: 'Semantics', sub: 'Grammar analysis' },
+  { id: 's3_model', code: 'S3', name: 'Learned', sub: 'Advisory model' },
   { id: 's4_decision', code: 'S4', name: 'Decision', sub: 'Policy fusion' },
 ]
 
+// Categorical palette, coordinated with the brand: warm hues (red→gold) for the
+// injection-class attacks, cool hues (azure→indigo) for auth/protocol, emerald
+// for CRS, navy-grey for the remainder.
 const CAT_TONE = {
-  'SQL injection': '#f87171', 'Cross-site scripting': '#fb923c', 'Command injection': '#fbbf24',
-  'Path traversal': '#a78bfa', 'Token forgery': '#38bdf8', 'Protocol abuse': '#f472b6',
-  'Rule match (CRS)': '#34d399', Other: '#8493ad',
+  'SQL injection': '#e8382b', 'Cross-site scripting': '#f2893a', 'Command injection': '#f3b53c',
+  'Path traversal': '#9b8cff', 'Token forgery': '#3aa0f2', 'Protocol abuse': '#e368a8',
+  'Rule match (CRS)': '#1fcf8f', Other: '#7c8ab4',
 }
 
 function ago(ts) {
@@ -31,7 +35,6 @@ export default function Dashboard({ status, events, series, go, alerts = [], ack
   const sorted = events.map((e) => e.latency_us).sort((x, y) => x - y)
   const lat = sorted.length ? sorted[Math.floor(sorted.length / 2)] / 1000 : 0
   const enforce = status?.mode === 'enforce'
-  const enabled = (id) => status?.stages?.find((x) => x.id === id)?.enabled
 
   // Per-stage counts of what each stage stopped, from the recent audit window.
   const stopped = {}
@@ -76,7 +79,7 @@ export default function Dashboard({ status, events, series, go, alerts = [], ack
           <div className="pipe">
             {PIPE.map((p, i) => {
               const tlsNode = p.id === 'tls'
-              const on = p.id === 's1_rules' ? enabled('s1_rules') : tlsNode ? !!status?.tls?.enabled : true
+              const on = tlsNode ? !!status?.tls?.enabled : (status?.stages?.find((x) => x.id === p.id)?.enabled ?? true)
               return (
                 <div key={p.id} className="pipe-item">
                   <div className={'pnode' + (on ? '' : ' off')}>

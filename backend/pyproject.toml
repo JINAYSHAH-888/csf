@@ -22,6 +22,9 @@ dependencies = [
     # which parser is live. A module whose behaviour depends on a package must
     # declare it rather than inherit it from a server extra that may drop it.
     "httptools>=0.6",
+    # Console authentication: Argon2id password hashing for the user store
+    # (console-api/auth.py). PyJWT above also signs the session cookies.
+    "argon2-cffi>=23.1",
 ]
 
 [project.optional-dependencies]

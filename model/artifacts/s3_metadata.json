@@ -1,34 +1,38 @@
 {
-  "trained_at": "2026-10-10T15:55:33+0530",
+  "trained_at": "2026-10-25T12:17:40+0530",
+  "approach": "multi-application (CSIC 2010 + ECML/PKDD 2007), values-only",
   "provenance_features": false,
-  "train_n": 10540,
-  "val_n": 2006,
-  "ecml_n": 4200,
-  "test_touched": false,
+  "train_n": 37029,
+  "csic_n": 24000,
+  "ecml_n": 22287,
+  "frozen_holdout_touched": false,
+  "note": "legacy CSIC frozen holdout intentionally unused (shares CSIC source; not independent for a multi-app model). See ADR-0019.",
   "vectoriser": "char_wb 2-5grams, min_df=3, max_features=200k",
   "classifier": "LogisticRegression C=4.0 balanced, isotonic-calibrated",
-  "val_thresholds": {
-    "0.01": {
-      "threshold": 0.5392203765227022,
-      "recall": 100.0,
-      "fpr": 1.25
+  "generalisation_demo_shop": {
+    "roc_auc": 0.941304347826087,
+    "shadow_mode_operating_points": {
+      "0.02": {
+        "threshold": 0.9990224828934506,
+        "recall": 82.6086956521739,
+        "fpr": 5.0
+      },
+      "0.05": {
+        "threshold": 0.9966279444315544,
+        "recall": 82.6086956521739,
+        "fpr": 5.0
+      },
+      "0.1": {
+        "threshold": 0.9634829488310911,
+        "recall": 86.95652173913044,
+        "fpr": 10.0
+      }
     },
-    "0.001": {
-      "threshold": 0.8877947804758097,
-      "recall": 92.87410926365796,
-      "fpr": 0.17857142857142858
-    }
+    "n_benign": 40,
+    "n_attack": 23
   },
-  "ecml_thresholds": {
-    "0.01": {
-      "threshold": 0.8882219282421328,
-      "recall": 67.46428571428571,
-      "fpr": 29.714285714285715
-    },
-    "0.001": {
-      "threshold": 0.8882219282421328,
-      "recall": 67.46428571428571,
-      "fpr": 29.714285714285715
-    }
+  "recommended_demo_thresholds": {
+    "tau_flag": 0.999,
+    "tau_block": 0.9995
   }
 }

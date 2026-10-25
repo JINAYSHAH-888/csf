@@ -9,4 +9,12 @@ Manual, without S1:
 - `cd backend && uv sync --extra dev && uv run python ../console-api/server.py`
 - `cd frontend && npm install && npm run dev`
 
-Pages: Dashboard, Live traffic, Scenario suite, Threat simulator, Token verification, Detection performance.
+Open the console on the **same host** the API uses (both `localhost` or both
+`127.0.0.1`): the session cookie is `SameSite=Lax`, so the page and the API must
+share a host for sign-in to persist. The API host defaults to the page's own
+host on port 8000; override with `VITE_API`.
+
+Access requires an account — sign up on first use (console-local user store,
+Argon2id + HttpOnly session cookie).
+
+Pages: Sign in / Sign up, Dashboard, Live traffic, Scenario suite, Threat simulator, Token verification, Detection performance.

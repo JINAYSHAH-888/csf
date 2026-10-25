@@ -6,8 +6,15 @@ import AttackLab from './pages/AttackLab'
 import JwtLab from './pages/JwtLab'
 import Traffic from './pages/Traffic'
 import Benchmarks from './pages/Benchmarks'
+import Login from './pages/Login'
+import SignUp from './pages/SignUp'
 import Palette from './components/Palette'
 import Logo from './components/Logo'
+
+const AUTH_PAGES = [
+  ['login', 'Sign in', 'key', Login],
+  ['signup', 'Sign up', 'key', SignUp],
+]
 
 const NAV = [
   { group: 'Monitor', items: [
@@ -52,12 +59,20 @@ export default function App() {
   const [gen, setGen] = useState(false)
   const [pal, setPal] = useState(false)
   const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || 'dark')
+  const [user, setUser] = useState(null)
+  const [authReady, setAuthReady] = useState(false)
   const seq = useRef(0)
   const last = useRef({ t: Date.now(), total: 0 })
 
   const go = (id) => { setPage(id); location.hash = id; window.scrollTo(0, 0) }
   const refresh = () =>
     api.status().then((s) => { setStatus(s); setDown(false) }).catch(() => setDown(true))
+
+  // Restore an existing session (HttpOnly cookie) on load. The gate below waits
+  // for this to resolve so the console never flashes before auth is known.
+  useEffect(() => {
+    api.me().then((r) => setUser(r.user)).catch(() => setUser(null)).finally(() => setAuthReady(true))
+  }, [])
 
   useEffect(() => {
     refresh()
@@ -118,6 +133,41 @@ export default function App() {
   const ackAlert = (id) => api.ackAlert(id).then((a) => setAlerts((l) => l.map((x) => (x.id === a.id ? a : x))))
 
   const reset = () => api.reset().then(() => { setEvents([]); setSeries([]); seq.current = 0; refresh() })
+  const logout = () => api.logout().catch(() => {}).finally(() => { setUser(null); go('login') })
+
+  // ---- authentication gate ------------------------------------------------
+  // The console is protected: until a session is confirmed, only the login and
+  // sign-up screens are reachable.
+  if (!authReady) {
+    return (
+      <div className="auth-shell">
+        <span className="brand-mark auth-splash"><Logo size={56} /></span>
+      </div>
+    )
+  }
+  if (!user) {
+    const authPage = AUTH_PAGES.find((p) => p[0] === page) || AUTH_PAGES[0]
+    const AuthView = authPage[3]
+    return (
+      <div className="content auth-shell">
+        <button className="theme-btn auth-theme" onClick={toggleTheme}
+          title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'} aria-label="Toggle theme">
+          <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={16} />
+        </button>
+        <div className="auth-wrap">
+          <div className="auth-head">
+            <span className="brand-mark"><Logo size={46} /></span>
+            <div>
+              <div className="brand-name">CSF</div>
+              <div className="brand-sub">Cascaded Semantic Firewall</div>
+            </div>
+          </div>
+          <AuthView go={go} onAuth={(u) => { setUser(u); go('dashboard') }} />
+          {down && <div className="alert bad auth-note">Console API unreachable. Is the backend running?</div>}
+        </div>
+      </div>
+    )
+  }
 
   const commands = [
     ...ALL.map(([id, label, icon]) => ({ group: 'Go to', label, icon, run: () => go(id) })),
@@ -125,11 +175,12 @@ export default function App() {
     { group: 'Action', label: theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme', icon: theme === 'dark' ? 'sun' : 'moon', run: toggleTheme },
     { group: 'Action', label: gen ? 'Stop traffic generator' : 'Start traffic generator', icon: 'zap', run: () => setGen((v) => !v) },
     { group: 'Action', label: 'Clear counters and log', icon: 'reset', run: reset },
+    { group: 'Action', label: 'Log out', icon: 'key', run: logout },
   ]
 
   const current = ALL.find((p) => p[0] === page) || ALL[0]
   const Page = current[3]
-  const live = { status, events, series, alerts, ackAlert, reset, refreshStatus: refresh, go }
+  const live = { status, events, series, alerts, ackAlert, reset, refreshStatus: refresh, go, user, onAuth: setUser }
   const openAlerts = alerts.filter((a) => !a.acknowledged)
 
   return (
@@ -155,8 +206,8 @@ export default function App() {
           ))}
         </nav>
         <div className="side-foot">
-          <div className="env"><span className="env-dot" /> Demo environment</div>
-          <div className="env-sub">v{status?.version || '0.1.0'} · {status?.stages?.find((s) => s.id === 's1_rules')?.enabled ? '4' : '3'} inspection stages</div>
+          <div className="env"><span className="env-dot" /> Live environment</div>
+          <div className="env-sub">v{status?.version || '0.1.0'} · {status?.stages?.filter((s) => s.enabled).length || 6} stages active</div>
         </div>
       </aside>
 
@@ -164,6 +215,13 @@ export default function App() {
         <div className="topbar">
           <div className="crumb"><span>CSF</span><Icon name="chevron" size={14} /><b>{current[1]}</b></div>
           <div className="top-right">
+            <div className="user-chip">
+              <span className="user-avatar">{(user.name || '?').trim().charAt(0).toUpperCase()}</span>
+              <span className="user-name">{user.name}</span>
+              <button className="link-btn user-out" onClick={logout} title="Log out" aria-label="Log out">
+                <Icon name="reset" size={14} />
+              </button>
+            </div>
             <button className={'bell' + (openAlerts.length ? ' on' : '')} onClick={() => go('dashboard')} title="Open alerts" aria-label="Alerts">
               <Icon name="bell" size={16} />{openAlerts.length > 0 && <i>{openAlerts.length}</i>}
             </button>
@@ -186,7 +244,7 @@ export default function App() {
         <main>
           {down && (
             <div className="alert bad">
-              Console API unreachable on port 8000. Start it with <code>run-demo.bat</code>.
+              Console API unreachable. Start the backend (console API) to resume the live feed.
             </div>
           )}
           <Page {...live} />

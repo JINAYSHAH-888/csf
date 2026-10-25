@@ -42,13 +42,24 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, PlainTextResponse, Response
 from starlette.routing import Route
 
-from csf.config import AuthConfig, Config, IssuerSettings, S1Settings, S2Settings
+from csf.config import AuthConfig, Config, IssuerSettings, S1Settings, S2Settings, S3Settings
 from csf.decision import DecisionEngine, StageEvidence
 from csf.extraction import extract
 from csf.main import build_app
 from csf.model.features import request_document
 from csf.telemetry import Mode
 from csf.verdict import Decision
+
+# Console-local modules (auth + user store). The console directory is added to
+# sys.path so these import cleanly whether the server is launched from backend/
+# or from the repo root.
+import sys
+_CONSOLE_DIR = Path(__file__).resolve().parent
+if str(_CONSOLE_DIR) not in sys.path:
+    sys.path.insert(0, str(_CONSOLE_DIR))
+
+import auth  # noqa: E402
+import db  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 RUNTIME = Path(__file__).resolve().parent / ".runtime"
@@ -272,6 +283,32 @@ def _build_config() -> Config:
         # breaker. 500 ms keeps the stage honest on this platform.
         cfg.s1 = S1Settings(enabled=True, socket_path=os.environ["CSF_S1_SOCKET"],
                             timeout_seconds=float(os.environ.get("CSF_S1_TIMEOUT", "0.5")))
+    # S3 learned stage: OFF by default (Phase 6 negative result). On the demo
+    # upstream the CSIC-trained model assigns probability ~1.0 to BOTH ordinary
+    # traffic ("q=coffee", a normal login) and real attacks -- the documented
+    # cross-application FPR collapse -- so in the decision path it would flag
+    # every legitimate request. Set CSF_S3_ENABLE=1 to load it anyway, in
+    # ADVISORY-ONLY mode (it may FLAG but never BLOCK, ADR-0017).
+    _s3_model = ROOT / "model" / "artifacts" / "s3_model.pkl"
+    if os.environ.get("CSF_S3_ENABLE") and _s3_model.exists():
+        # Operating point: the model emits calibrated probabilities, but the
+        # absolute scale shifts between applications, so thresholds are taken
+        # from a shadow-mode calibration on THIS deployment's benign traffic
+        # (recorded in the model metadata by train_s3_multiapp.py, ADR-0019).
+        _tau_flag, _tau_block = 0.80, 0.99
+        try:
+            _rec = json.loads((ROOT / "model" / "artifacts" / "s3_metadata.json")
+                              .read_text()).get("recommended_demo_thresholds", {})
+            _tau_flag = float(_rec.get("tau_flag", _tau_flag))
+            _tau_block = float(_rec.get("tau_block", _tau_block))
+            if not 0.0 < _tau_flag < _tau_block <= 1.0:  # keep the invariant
+                _tau_flag, _tau_block = 0.80, 0.99
+        except Exception:
+            pass
+        cfg.s3 = S3Settings(
+            enabled=True, model_path=str(_s3_model),
+            tau_flag=_tau_flag, tau_block=_tau_block,
+            trained_on_this_application=True, advisory_only=True)
     cfg.auth = AuthConfig(
         enabled=True, protected_prefixes=("/admin", "/api/internal"),
         fail_closed=True,
@@ -519,10 +556,12 @@ async def api_status(_: Request) -> JSONResponse:
             {"id": "s0_auth", "label": "S0 JWT auth", "enabled": True},
             {"id": "s1_rules", "label": "S1 CRS rules (Coraza)",
              "enabled": bool(os.environ.get("CSF_S1_SOCKET")),
-             "note": "needs the Go sidecar (docker compose)"},
+             "note": "OWASP Core Rule Set via the Coraza sidecar"},
             {"id": "s2_semantic", "label": "S2 Semantic parse", "enabled": True},
-            {"id": "s3_model", "label": "S3 Learned", "enabled": False,
-             "note": "off by default (documented negative result, ADR-0017)"},
+            {"id": "s3_model", "label": "S3 Learned",
+             "enabled": bool(os.environ.get("CSF_S3_ENABLE"))
+             and (ROOT / "model" / "artifacts" / "s3_model.pkl").exists(),
+             "note": "multi-app model, advisory-only; calibrated per deployment (ADR-0019)"},
             {"id": "s4_decision", "label": "S4 Decision", "enabled": True},
         ],
     })
@@ -736,6 +775,125 @@ async def api_health(_: Request) -> PlainTextResponse:
     return PlainTextResponse("ok")
 
 
+# --------------------------------------------------------------------------
+# Authentication: sign up / log in / log out / whoami, backed by a SQLite user
+# store (db.py) with Argon2id password hashing and HttpOnly JWT session cookies
+# (auth.py). The session cookie is HttpOnly + SameSite=lax, and Secure whenever
+# the request is served over HTTPS.
+# --------------------------------------------------------------------------
+
+def _is_secure(request: Request) -> bool:
+    if os.environ.get("CSF_COOKIE_SECURE", "").lower() in ("true", "1"):
+        return True
+    return request.url.scheme == "https" or request.headers.get("x-forwarded-proto") == "https"
+
+
+def _set_auth_cookie(response: Response, token: str, request: Request) -> None:
+    response.set_cookie(
+        key=auth.COOKIE_NAME,
+        value=token,
+        max_age=auth.SESSION_DURATION_SECONDS,
+        httponly=True,
+        samesite="lax",
+        secure=_is_secure(request),
+        path="/",
+    )
+
+
+def _clear_auth_cookie(response: Response, request: Request) -> None:
+    response.delete_cookie(
+        key=auth.COOKIE_NAME,
+        path="/",
+        httponly=True,
+        samesite="lax",
+        secure=_is_secure(request),
+    )
+
+
+async def api_signup(request: Request) -> JSONResponse:
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "Invalid JSON body."}, status_code=400)
+
+    name = str(body.get("name") or "")
+    email = str(body.get("email") or "")
+    password = str(body.get("password") or "")
+    confirm_password = str(body.get("confirm_password") or "")
+
+    err = auth.validate_signup_input(name, email, password, confirm_password)
+    if err:
+        return JSONResponse({"error": err}, status_code=400)
+
+    existing = db.get_user_by_email(email)
+    if existing:
+        return JSONResponse({"error": "Email is already registered."}, status_code=409)
+
+    pwd_hash = auth.hash_password(password)
+    user = db.create_user(name, email, pwd_hash)
+    token = auth.create_session_token(user)
+
+    resp = JSONResponse({"user": user}, status_code=201)
+    _set_auth_cookie(resp, token, request)
+    return resp
+
+
+async def api_login(request: Request) -> JSONResponse:
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "Invalid JSON body."}, status_code=400)
+
+    email = str(body.get("email") or "")
+    password = str(body.get("password") or "")
+
+    err = auth.validate_login_input(email, password)
+    if err:
+        return JSONResponse({"error": err}, status_code=400)
+
+    user = db.get_user_by_email(email)
+    if not user or not auth.verify_password(password, user["password_hash"]):
+        return JSONResponse({"error": "Invalid email or password."}, status_code=401)
+
+    clean_user = {k: v for k, v in user.items() if k != "password_hash"}
+    token = auth.create_session_token(clean_user)
+
+    resp = JSONResponse({"user": clean_user}, status_code=200)
+    _set_auth_cookie(resp, token, request)
+    return resp
+
+
+async def api_logout(request: Request) -> JSONResponse:
+    resp = JSONResponse({"ok": True}, status_code=200)
+    _clear_auth_cookie(resp, request)
+    return resp
+
+
+async def api_me(request: Request) -> JSONResponse:
+    token = request.cookies.get(auth.COOKIE_NAME)
+    if not token:
+        auth_hdr = request.headers.get("authorization", "")
+        if auth_hdr.lower().startswith("bearer "):
+            token = auth_hdr[7:].strip()
+
+    if not token:
+        return JSONResponse({"error": "Not authenticated."}, status_code=401)
+
+    payload = auth.verify_session_token(token)
+    if not payload:
+        resp = JSONResponse({"error": "Session expired or invalid."}, status_code=401)
+        _clear_auth_cookie(resp, request)
+        return resp
+
+    user = db.get_user_by_id(payload["sub"])
+    if not user:
+        resp = JSONResponse({"error": "User not found."}, status_code=401)
+        _clear_auth_cookie(resp, request)
+        return resp
+
+    return JSONResponse({"user": user}, status_code=200)
+
+
 routes = [
     Route("/api/health", api_health),
     Route("/api/status", api_status),
@@ -751,13 +909,38 @@ routes = [
     Route("/api/analyze", api_analyze, methods=["POST"]),
     Route("/api/send", api_send, methods=["POST"]),
     Route("/api/presets", api_presets),
+    Route("/api/auth/signup", api_signup, methods=["POST"]),
+    Route("/api/auth/login", api_login, methods=["POST"]),
+    Route("/api/auth/logout", api_logout, methods=["POST"]),
+    Route("/api/auth/me", api_me),
 ]
-console_app = Starlette(routes=routes, middleware=[
-    Middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"],
-               allow_headers=["*"])])
+
+# Credentialed CORS: a wildcard origin cannot carry cookies, so the frontend
+# origin is allow-listed explicitly and allow_credentials is enabled. Extra
+# origins (e.g. a deployed console) can be added via CSF_FRONTEND_URL.
+ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+if os.environ.get("CSF_FRONTEND_URL"):
+    ALLOWED_ORIGINS.append(os.environ["CSF_FRONTEND_URL"].rstrip("/"))
+
+console_app = Starlette(
+    routes=routes,
+    middleware=[
+        Middleware(
+            CORSMiddleware,
+            allow_origins=ALLOWED_ORIGINS,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    ],
+)
 
 
 async def amain() -> None:
+    db.init_db()  # create the users table if it does not exist yet
     cfg = _build_config()
     gateway, _auth = await build_app(cfg)
     logging.getLogger("csf").addHandler(_Capture())
@@ -776,10 +959,13 @@ async def amain() -> None:
         return uvicorn.Server(uvicorn.Config(
             app, host=host, port=port, log_level="warning", access_log=False, **extra))
 
+    # The console port is configurable so it can coexist with another local
+    # service already holding 8000. Default unchanged.
+    console_port = int(os.environ.get("CSF_CONSOLE_PORT", "8000"))
     await asyncio.gather(
         srv(shop_app, 3000).serve(),
         srv(gateway, 8080, BIND, tls=True).serve(),
-        srv(console_app, 8000, BIND).serve(),
+        srv(console_app, console_port, BIND).serve(),
         alert_loop(),
     )
 

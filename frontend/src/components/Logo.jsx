@@ -5,12 +5,12 @@ export default function Logo({ size = 38 }) {
     <svg width={size} height={size} viewBox="0 0 40 40" fill="none" aria-label="CSF" role="img">
       <defs>
         <linearGradient id="lg-l" x1="6" y1="4" x2="20" y2="36" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#7fb0ff" />
-          <stop offset="1" stopColor="#3a63e8" />
+          <stop offset="0" stopColor="#5f8df4" />
+          <stop offset="1" stopColor="#1b46b4" />
         </linearGradient>
         <linearGradient id="lg-r" x1="20" y1="4" x2="34" y2="36" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#5a7cf5" />
-          <stop offset="1" stopColor="#7a52e6" />
+          <stop offset="0" stopColor="#2f63d8" />
+          <stop offset="1" stopColor="#0d2f84" />
         </linearGradient>
         <linearGradient id="lg-edge" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#ffffff" stopOpacity=".7" />

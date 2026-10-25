@@ -1,10 +1,30 @@
-export const API = import.meta.env.VITE_API || 'http://127.0.0.1:8000'
+// Default the console API to the SAME host the page is served from (port 8000).
+// The session cookie is SameSite=Lax, so the page and the API must share a host
+// for it to be sent — deriving the host here makes auth work whether the console
+// is opened on localhost or 127.0.0.1. VITE_API overrides for other setups.
+function defaultApi() {
+  try {
+    return `${location.protocol}//${location.hostname}:8000`
+  } catch {
+    return 'http://127.0.0.1:8000'
+  }
+}
+export const API = import.meta.env.VITE_API || defaultApi()
 
-export const EXPORT_URL = (import.meta.env.VITE_API || 'http://127.0.0.1:8000') + '/api/export/feedback.jsonl'
+export const EXPORT_URL = API + '/api/export/feedback.jsonl'
 
-async function call(path, opts) {
-  const r = await fetch(API + path, opts)
-  if (!r.ok) throw new Error(`${path} -> ${r.status}`)
+async function call(path, opts = {}) {
+  const r = await fetch(API + path, {
+    credentials: 'include',
+    ...opts,
+  })
+  if (!r.ok) {
+    const data = await r.json().catch(() => ({}))
+    const err = new Error(data.error || `${path} -> ${r.status}`)
+    err.status = r.status
+    err.data = data
+    throw err
+  }
   return r.json()
 }
 const post = (path, body) =>
@@ -27,4 +47,8 @@ export const api = {
   alerts: () => call('/api/alerts'),
   ackAlert: (id) => post(`/api/alerts/${id}/ack`),
   exportSummary: () => call('/api/export/summary'),
+  login: (creds) => post('/api/auth/login', creds),
+  signup: (data) => post('/api/auth/signup', data),
+  logout: () => post('/api/auth/logout'),
+  me: () => call('/api/auth/me'),
 }

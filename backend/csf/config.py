@@ -170,11 +170,18 @@ class S2Settings:
 class S3Settings:
     """S3 learned stage.
 
-    **Disabled by default, deliberately.** Phase 6 measured ROC-AUC 0.9993 on
-    the corpus it was tuned on and 0.5250–0.7059 on an unseen application.
-    A model trained on one application's traffic does not generalise to
-    another, so enabling S3 is only defensible where it was trained on
-    traffic from the application it is protecting.
+    **Disabled by default.** Phase 6 measured ROC-AUC 0.9993 in-corpus and
+    0.5250–0.7059 on an unseen application *when trained on a single
+    application* — the model learned one app's benign vocabulary.
+
+    ADR-0019 revisits this: training on MULTIPLE applications (CSIC + ECML)
+    teaches attack structure instead, raising cross-application ROC-AUC on a
+    third unseen app from ~0.50 to ~0.94. With the threshold calibrated on the
+    deployment's own benign (shadow mode), that is ~82% recall at ~2–5% FPR.
+    So S3 is defensible where it was trained on diverse / the protected
+    application's traffic AND calibrated on that application's benign. It stays
+    off by default and advisory-only (ADR-0017) until an operator does both.
+    `scripts/train_s3_multiapp.py` trains the shipped multi-application model.
     """
 
     enabled: bool = False

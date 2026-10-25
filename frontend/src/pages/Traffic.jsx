@@ -114,7 +114,7 @@ function Chart({ data }) {
     <svg viewBox={`0 0 ${w} ${h}`} className="chart" preserveAspectRatio="none">
       <defs>
         <linearGradient id="cg" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stopColor="#4f8cff" stopOpacity=".45" /><stop offset="1" stopColor="#4f8cff" stopOpacity="0" />
+          <stop offset="0" stopColor="#255dce" stopOpacity=".5" /><stop offset="1" stopColor="#255dce" stopOpacity="0" />
         </linearGradient>
       </defs>
       {[0, 0.5, 1].map((f) => <line key={f} x1="0" x2={w} y1={h - 16 - f * (h - 30)} y2={h - 16 - f * (h - 30)} className="grid-line" />)}
