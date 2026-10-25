@@ -6,10 +6,11 @@
 # could be a deployable unit; until it builds reproducibly it is not one.
 
 # --- build -----------------------------------------------------------------
-# Digest-pinned to go1.27.2 for reproducibility AND to patch the net/http,
-# crypto/tls and net/textproto CVEs that go1.27.1 carried (GO-2026-66xx,
-# caught by govulncheck in the final review). Re-pin on an intentional bump.
-FROM golang:1.27-alpine@sha256:f92b6ef800e499660581efdabdf25d9d817a9d124eaf900924f0504e7e27e12d AS build
+# Digest-pinned to go1.27.3 for reproducibility AND to patch the net/http,
+# crypto/tls, net/textproto and crypto/x509 CVEs in earlier 1.27.x (GO-2026-66xx
+# and GO-2026-6809, caught by govulncheck). go.mod requires go >= 1.27.3, so the
+# build image must be at least that. Re-pin on an intentional bump.
+FROM golang:1.27.3-alpine@sha256:b8c9b82affbbb82a020bbcf998dad2ba9516944ac7e883524642a481a9505e9c AS build
 
 WORKDIR /src
 
